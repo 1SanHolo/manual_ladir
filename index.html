@@ -5710,5 +5710,191 @@ LADIR • Faculdade de Direito • FADIR / UFMS`;
       }
     };
   </script>
+  <!-- =====================================================================
+     FASE 3: LOGIN INSTITUCIONAL, NUVEM RELACIONAL & LGPD (PORTAL LADIR)
+     ===================================================================== -->
+<div id="auth-gate-ladir" class="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-header">
+      <span class="badge-ufms">FADIR / UFMS • Campo Grande-MS</span>
+      <h2>Portal LADIR</h2>
+      <p>Laboratório de Acesso aos Direitos • Ambiente Seguro</p>
+    </div>
+
+    <form id="form-login-ladir">
+      <label for="email-ufms">E-mail Institucional</label>
+      <input type="email" id="email-ufms" placeholder="nome.sobrenome@ufms.br" required />
+
+      <label for="senha-ufms">Senha</label>
+      <input type="password" id="senha-ufms" placeholder="••••••••" required />
+
+      <div class="lgpd-notice">
+        <input type="checkbox" id="check-sigilo-lgpd" required />
+        <label for="check-sigilo-lgpd">
+          Declaro ciência do dever de sigilo profissional e conformidade com a <strong>LGPD (Lei 13.709/2018)</strong> quanto ao tratamento de dados pessoais e sensíveis dos assistidos.
+        </label>
+      </div>
+
+      <button type="submit" id="btn-submit-login" class="btn-primary-ufms">Acessar Sistema</button>
+      <p id="auth-error-msg" class="error-text" hidden></p>
+    </form>
+  </div>
+</div>
+
+<style>
+  .auth-overlay {
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.92);
+    display: flex; align-items: center; justify-content: center; z-index: 99999;
+    backdrop-filter: blur(5px); font-family: system-ui, -apple-system, sans-serif;
+  }
+  .auth-card {
+    background: #ffffff; padding: 2rem; border-radius: 10px; width: 90%; max-width: 420px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); border-top: 5px solid #005596;
+  }
+  .badge-ufms { font-size: 0.75rem; font-weight: 700; color: #005596; text-transform: uppercase; }
+  .auth-header h2 { margin: 0.25rem 0; color: #1e293b; font-size: 1.5rem; }
+  .auth-header p { margin: 0 0 1.25rem; font-size: 0.875rem; color: #64748b; }
+  #form-login-ladir label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; color: #334155; }
+  #form-login-ladir input[type="email"],
+  #form-login-ladir input[type="password"] {
+    width: 100%; padding: 0.65rem; margin-bottom: 1rem; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;
+  }
+  .lgpd-notice {
+    display: flex; gap: 0.6rem; align-items: flex-start; background: #f8fafc;
+    padding: 0.75rem; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 1.25rem;
+  }
+  .lgpd-notice label { font-weight: 400 !important; font-size: 0.78rem !important; line-height: 1.35; margin: 0 !important; }
+  .btn-primary-ufms {
+    width: 100%; padding: 0.75rem; background: #005596; color: #fff; border: none;
+    border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.95rem;
+  }
+  .btn-primary-ufms:hover { background: #004173; }
+  .error-text { color: #dc2626; font-size: 0.82rem; margin-top: 0.75rem; text-align: center; }
+</style>
+
+<!-- SDK do Supabase via CDN + Lógica Completa Fase 3 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://zgnvazpmlafpncjbiadb.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_JjO6GSos_xL7MBfrYSZTeg_vTjKSq7o';
+
+  const ladirSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // 1. Trilha de Auditoria LGPD
+  window.registrarAuditoriaLGPD = async function(acao, recursoId = null, detalhes = '') {
+    const { data: { user } } = await ladirSupabase.auth.getUser();
+    if (!user) return;
+    await ladirSupabase.from('auditoria_lgpd').insert({
+      usuario_id: user.id,
+      acao,
+      recurso_id: recursoId,
+      detalhes
+    });
+  };
+
+  // 2. Salvar Ficha de Atendimento na Nuvem
+  window.salvarFichaNuvem = async function(dadosFicha) {
+    if (!dadosFicha.consentimentoLGPD) {
+      throw new Error('É obrigatório confirmar o consentimento LGPD do assistido antes de salvar.');
+    }
+
+    const { data: { user } } = await ladirSupabase.auth.getUser();
+    if (!user) throw new Error('Sessão expirada. Faça login novamente.');
+
+    const payload = {
+      protocolo: dadosFicha.protocolo || `LADIR-${Date.now().toString().slice(-6)}`,
+      assistido_nome: dadosFicha.nome,
+      assistido_cpf: dadosFicha.cpf,
+      assistido_rg: dadosFicha.rg || '',
+      assistido_endereco: dadosFicha.endereco || '',
+      assistido_telefone: dadosFicha.telefone || '',
+      assistido_renda_familiar: parseFloat(dadosFicha.renda) || 0,
+      via_selecionada: dadosFicha.viaDiagnostico || null,
+      diagnostico_resumo: dadosFicha.resumoDiagnostico || '',
+      dados_completos: dadosFicha,
+      consentimento_assistido: true,
+      criado_por: user.id,
+      atualizado_em: new Date().toISOString()
+    };
+
+    const { data, error } = await ladirSupabase
+      .from('atendimentos_ladir')
+      .upsert(payload, { onConflict: 'protocolo' })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    await window.registrarAuditoriaLGPD(
+      'SALVAR_FICHA',
+      data.id,
+      `Protocolo ${data.protocolo} salvo por ${user.email}`
+    );
+
+    return data;
+  };
+
+  // 3. Busca Global no Cabeçalho conectada ao Supabase
+  window.buscarAtendimentosNuvem = async function(termo) {
+    if (!termo || termo.trim().length < 3) return [];
+
+    const { data, error } = await ladirSupabase
+      .from('atendimentos_ladir')
+      .select('id, protocolo, assistido_nome, assistido_cpf, via_selecionada, dados_completos, atualizado_em')
+      .or(`assistido_nome.ilike.%${termo}%,assistido_cpf.ilike.%${termo}%,protocolo.ilike.%${termo}%`)
+      .order('atualizado_em', { ascending: false })
+      .limit(10);
+
+    if (error) throw error;
+    return data;
+  };
+
+  // 4. Controle da Tela de Login e Sessão Ativa
+  const authGate = document.getElementById('auth-gate-ladir');
+  ladirSupabase.auth.onAuthStateChange((event, session) => {
+    if (session && session.user) {
+      authGate.style.display = 'none';
+      console.log('LADIR Autenticado:', session.user.email);
+    } else {
+      authGate.style.display = 'flex';
+    }
+  });
+
+  document.getElementById('form-login-ladir').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById('auth-error-msg');
+    const btn = document.getElementById('btn-submit-login');
+    errorEl.hidden = true;
+
+    const email = document.getElementById('email-ufms').value.trim();
+    const password = document.getElementById('senha-ufms').value;
+
+    if (!email.endsWith('@ufms.br')) {
+      errorEl.textContent = 'Acesso restrito: utilize seu e-mail institucional (@ufms.br).';
+      errorEl.hidden = false;
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Autenticando...';
+
+    const { data, error } = await ladirSupabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      errorEl.textContent = 'E-mail ou senha inválidos.';
+      errorEl.hidden = false;
+      btn.disabled = false;
+      btn.textContent = 'Acessar Sistema';
+      return;
+    }
+
+    await ladirSupabase
+      .from('perfis_ladir')
+      .update({ termo_lgpd_aceito: true, data_aceite_lgpd: new Date().toISOString() })
+      .eq('id', data.user.id);
+
+    await window.registrarAuditoriaLGPD('LOGIN_PORTAL', null, `Acesso por ${email}`);
+  });
+</script>
 </body>
 </html>
