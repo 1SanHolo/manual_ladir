@@ -6028,92 +6028,159 @@ LADIR • Faculdade de Direito • FADIR / UFMS`;
       window.setActiveSection('sec-simulador');
     }
   };
-  // Modernização automática da Ficha de Encaminhamento (Padrão LAPREVS) antes da impressão
+  // Modernização automática da Ficha de Encaminhamento (Padrão LAPREVS - Popup e Impressão A4)
   (function() {
-    function formatarDocumentoLadirModerno() {
-      const corpo = document.getElementById('print-doc-corpo');
-      const dataEl = document.getElementById('print-doc-data-emissao');
-      if (!corpo) return;
-
-      // Atualiza a data/hora de emissão no cabeçalho
-      if (dataEl) {
-        const agora = new Date();
-        dataEl.textContent = 'Emitido em ' + agora.toLocaleDateString('pt-BR') + ' às ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      }
-
-      // Evita reformatar duas vezes o mesmo conteúdo
-      if (corpo.dataset.formatadoModerno === 'true') return;
-
-      const textoBruto = corpo.innerText || corpo.textContent || '';
-      if (!textoBruto.trim()) return;
-
+    function converterTextoParaHtmlModerno(textoBruto) {
       const linhas = textoBruto.split('\n');
       let htmlFinal = '';
       let blocoAberto = false;
+      let pulouCabecalhoTexto = false;
 
-      linhas.forEach(linha => {
+      linhas.forEach((linha, idx) => {
         const l = linha.trim();
-        // Ignora linhas puramente decorativas estilo máquina de escrever (===, ---, ***)
         if (!l || /^[=\-*_]{3,}$/.test(l)) return;
 
-        // Detecta títulos de seção (linhas em MAIÚSCULAS sem dois-pontos ou terminadas em :)
-        const ehCabecalhoSecao = (l === l.toUpperCase() && l.length > 3 && !l.includes(':')) || (l.endsWith(':') && l === l.toUpperCase());
+        // Pula as 4 primeiras linhas de cabeçalho antigo em texto puro (pois já temos o cabeçalho timbrado moderno)
+        if (!pulouCabecalhoTexto && idx < 6 && (
+          l.startsWith('FICHA DE ENCAMINHAMENTO') ||
+          l.startsWith('LADIR •') ||
+          l.startsWith('Faculdade de Direito') ||
+          l.startsWith('Cátedra Sérgio Vieira')
+        )) {
+          return;
+        }
+        pulouCabecalhoTexto = true;
+
+        // Detecta títulos de seção em MAIÚSCULAS
+        const ehCabecalhoSecao = (l === l.toUpperCase() && l.length > 4 && !l.startsWith('•')) || (l.endsWith(':') && l === l.toUpperCase());
 
         if (ehCabecalhoSecao) {
           if (blocoAberto) htmlFinal += '</div></div>';
           const tituloLimpo = l.replace(/:$/, '');
           htmlFinal += `
             <div style="border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 12px; overflow: hidden; page-break-inside: avoid;">
-              <div style="background: #f0f4f9; border-bottom: 1px solid #cbd5e1; padding: 5px 10px; font-size: 8.5pt; font-weight: 800; color: #0f2038; text-transform: uppercase; letter-spacing: 0.4px;">
+              <div style="background: #f0f4f9; border-bottom: 1px solid #cbd5e1; padding: 6px 12px; font-size: 8.5pt; font-weight: 800; color: #0f2038; text-transform: uppercase; letter-spacing: 0.4px;">
                 ${tituloLimpo}
               </div>
-              <div style="padding: 8px 12px; display: flex; flex-direction: column; gap: 4px;">
+              <div style="padding: 10px 14px; display: flex; flex-direction: column; gap: 5px;">
           `;
           blocoAberto = true;
         } else {
           if (!blocoAberto) {
-            htmlFinal += `<div style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">`;
+            htmlFinal += `<div style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 14px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px;">`;
             blocoAberto = true;
           }
 
-          // Destaca rótulos no formato "Campo: Valor"
-          const idxDoisPontos = l.indexOf(':');
-          if (idxDoisPontos > 0 && idxDoisPontos < 45) {
-            const rotulo = l.substring(0, idxDoisPontos + 1);
-            const valor = l.substring(idxDoisPontos + 1).trim();
-            htmlFinal += `<div style="font-size: 9pt;"><strong style="color: #0f2038;">${rotulo}</strong> <span style="color: #334155;">${valor}</span></div>`;
+          const textoSemBullet = l.replace(/^[•\-]\s*/, '');
+          const idxDoisPontos = textoSemBullet.indexOf(':');
+          if (idxDoisPontos > 0 && idxDoisPontos < 48 && l.startsWith('•')) {
+            const rotulo = textoSemBullet.substring(0, idxDoisPontos + 1);
+            const valor = textoSemBullet.substring(idxDoisPontos + 1).trim();
+            htmlFinal += `<div style="font-size: 9.5pt; line-height: 1.45;"><strong style="color: #0f2038;">${rotulo}</strong> <span style="color: #1e293b;">${valor}</span></div>`;
           } else {
-            htmlFinal += `<div style="font-size: 9pt; color: #334155;">${l}</div>`;
+            htmlFinal += `<div style="font-size: 9.5pt; color: #1e293b; line-height: 1.5; text-align: justify;">${textoSemBullet}</div>`;
           }
         }
       });
 
       if (blocoAberto) htmlFinal += '</div></div>';
+      return htmlFinal;
+    }
 
-      if (htmlFinal) {
-        corpo.innerHTML = htmlFinal;
-        corpo.dataset.formatadoModerno = 'true';
+    function gerarPaginaCompletaPadraoLaprevs(tituloDoc, textoBruto) {
+      const agora = new Date();
+      const dataStr = agora.toLocaleDateString('pt-BR') + ' às ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const corpoHtml = converterTextoParaHtmlModerno(textoBruto);
+
+      return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>${tituloDoc || 'Ficha de Encaminhamento - LADIR UFMS'}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: #f1f5f9; color: #0f172a; margin: 0; padding: 24px; }
+    .toolbar { max-width: 210mm; margin: 0 auto 16px auto; display: flex; justify-content: flex-end; gap: 10px; }
+    .btn-print { background: #1b365d; color: #ffffff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 2px 6px rgba(15,32,56,0.2); }
+    .btn-print:hover { background: #0f2038; }
+    .folha-a4 { max-width: 210mm; min-height: 297mm; margin: 0 auto; background: #ffffff; padding: 16mm 18mm; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    @media print {
+      body { background: #ffffff; padding: 0; }
+      .toolbar { display: none !important; }
+      .folha-a4 { box-shadow: none; border-radius: 0; padding: 10mm 12mm; width: 100%; max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button class="btn-print" onclick="window.print()">🖨️ Imprimir Documento (A4)</button>
+  </div>
+  <div class="folha-a4">
+    <!-- Cabeçalho Institucional Padrão LAPREVS -->
+    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #0f2038; padding-bottom: 12px; margin-bottom: 18px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="https://raw.githubusercontent.com/1SanHolo/manual_ladir/main/logo-ladir.png" alt="Logo LADIR" style="width: 50px; height: 50px; object-fit: contain; border-radius: 8px; border: 1px solid #dce5f2; padding: 3px;">
+        <div>
+          <p style="font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #2b5288; margin: 0;">Universidade Federal de Mato Grosso do Sul • FADIR</p>
+          <h1 style="font-size: 12.5pt; font-weight: 800; color: #0f2038; margin: 2px 0;">LADIR — Liga Acadêmica de Direito Internacional e Refugiados</h1>
+          <p style="font-size: 8.5pt; color: #475569; margin: 0;">Cátedra Sérgio Vieira de Mello (CSVM / ACNUR Brasil) • Campo Grande - MS</p>
+        </div>
+      </div>
+      <div style="text-align: right; flex-shrink: 0;">
+        <div style="display: inline-block; padding: 5px 12px; background: #f0f4f9; border: 1px solid #bfdbfe; border-radius: 6px;">
+          <span style="font-size: 8.5pt; font-weight: 800; color: #1b365d; text-transform: uppercase; letter-spacing: 0.5px;">ENCAMINHAMENTO INTERINSTITUCIONAL</span>
+        </div>
+        <p style="font-size: 7.5pt; color: #64748b; margin: 5px 0 0 0;">Emitido em ${dataStr}</p>
+      </div>
+    </div>
+
+    <!-- Corpo em Cartões Estruturados -->
+    <div>${corpoHtml}</div>
+
+    <!-- Rodapé de Assinaturas -->
+    <div style="margin-top: 28px; padding-top: 14px; border-top: 1px solid #cbd5e1; page-break-inside: avoid;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 36px; margin-top: 26px; text-align: center;">
+        <div>
+          <div style="border-top: 1px solid #475569; padding-top: 5px; font-size: 8.5pt; font-weight: 700; color: #0f2038;">
+            Atendente Extensionista — LADIR / UFMS
+          </div>
+          <div style="font-size: 7.5pt; color: #64748b;">Nome Legível / Matrícula</div>
+        </div>
+        <div>
+          <div style="border-top: 1px solid #475569; padding-top: 5px; font-size: 8.5pt; font-weight: 700; color: #0f2038;">
+            Assinatura do(a) Assistido(a) / Responsável
+          </div>
+          <div style="font-size: 7.5pt; color: #64748b;">Ciente das orientações e do encaminhamento</div>
+        </div>
+      </div>
+      <div style="margin-top: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 7px 10px; font-size: 7.5pt; color: #64748b; text-align: center;">
+        Documento oficial emitido pelo Portal Operacional Digital LADIR/UFMS • Atendimento gratuito e sigiloso (LGPD — Lei nº 13.709/2018).
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+    }
+
+    // Intercepta a abertura da janela popup (about:blank) de impressão
+    const _originalOpen = window.open;
+    window.open = function(url, target, features) {
+      const win = _originalOpen.call(window, url, target, features);
+      if (win && (!url || url === '' || url === 'about:blank')) {
+        const _origWrite = win.document.write.bind(win.document);
+        win.document.write = function(htmlContent) {
+          if (typeof htmlContent === 'string' && (htmlContent.includes('FICHA DE ENCAMINHAMENTO') || htmlContent.includes('LADIR'))) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            const textoExtraido = tempDiv.innerText || tempDiv.textContent || '';
+            return _origWrite(gerarPaginaCompletaPadraoLaprevs('Ficha de Encaminhamento - LADIR UFMS', textoExtraido));
+          }
+          return _origWrite(htmlContent);
+        };
       }
-    }
-
-    // Intercepta a chamada de impressão do navegador
-    const _originalPrint = window.print;
-    window.print = function() {
-      formatarDocumentoLadirModerno();
-      _originalPrint.call(window);
+      return win;
     };
-    window.addEventListener('beforeprint', formatarDocumentoLadirModerno);
-
-    // Observa mudanças no corpo do documento para limpar a flag quando uma nova ficha for gerada
-    const alvoCorpo = document.getElementById('print-doc-corpo');
-    if (alvoCorpo) {
-      const observer = new MutationObserver(() => {
-        if (!alvoCorpo.querySelector('div')) {
-          delete alvoCorpo.dataset.formatadoModerno;
-        }
-      });
-      observer.observe(alvoCorpo, { childList: true });
-    }
   })();
 </script>
 </body>
