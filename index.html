@@ -60,6 +60,35 @@
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+  <!-- MODAL DE LOGIN RESTRITO (NÃO BLOQUEANTE) -->
+<div id="auth-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200 relative">
+    <button type="button" onclick="fecharModalLogin()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 font-bold text-lg px-2">✕</button>
+    <div class="text-center mb-5">
+      <div class="w-12 h-12 bg-sky-100 text-brand-900 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">🔒</div>
+      <h2 class="text-lg font-extrabold text-brand-900">Área Restrita — LADIR / UFMS</h2>
+      <p class="text-xs text-slate-500 mt-1">Faça login para acessar a Ficha de Atendimento e o Banco de Atendimentos.</p>
+    </div>
+
+    <form id="login-form" onsubmit="fazerLogin(event)" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">E-mail Institucional</label>
+        <input type="email" id="login-email" required placeholder="ligante@ufms.br"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none text-sm">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Senha</label>
+        <input type="password" id="login-password" required placeholder="••••••••"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none text-sm">
+      </div>
+      <div id="login-error" class="hidden text-xs text-red-700 bg-red-50 p-2.5 rounded-lg border border-red-200 font-medium"></div>
+      <button type="submit" id="btn-login-submit"
+        class="w-full bg-brand-900 hover:bg-brand-800 text-white font-bold py-2.5 rounded-lg transition shadow-sm text-sm">
+        Entrar no Sistema
+      </button>
+    </form>
+  </div>
+</div>
 
   <!-- Header em Azul Claro (Azul Bebê) com Logotipo da LADIR/UFMS -->
   <header class="bg-sky-100 text-slate-800 border-b border-sky-200 sticky top-0 z-40 shadow-sm">
@@ -107,6 +136,26 @@
             <span>🧭</span>
             <span>Nova Triagem</span>
           </button>
+          <!-- Controle de Login Restrito no Topo -->
+          <div id="header-auth-controls" class="flex items-center">
+            <!-- Estado Deslogado -->
+            <button type="button" id="btn-open-login" onclick="abrirModalLogin()"
+              class="flex items-center space-x-1.5 bg-white hover:bg-sky-50 text-brand-900 border border-sky-300 px-3 py-1.5 rounded-lg text-xs font-bold shadow-2xs transition">
+              <span>🔒</span>
+              <span class="hidden sm:inline">Acesso Restrito</span>
+              <span class="sm:hidden">Login</span>
+            </button>
+
+            <!-- Estado Logado (Oculto por padrão) -->
+            <div id="user-logged-badge" class="hidden items-center space-x-2 bg-white/90 border border-emerald-300 px-2.5 py-1 rounded-lg shadow-2xs">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span id="user-email-display" class="text-[11px] font-bold text-slate-700 hidden md:inline max-w-[140px] truncate"></span>
+              <button type="button" onclick="fazerLogout()" title="Sair da conta"
+                class="text-[11px] bg-red-600 hover:bg-red-700 text-white font-bold px-2 py-0.5 rounded transition">
+                Sair
+              </button>
+            </div>
+          </div>
           <button id="toggle-mobile-menu" class="md:hidden p-2 text-slate-700 hover:text-brand-900 hover:bg-sky-200/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400" aria-label="Abrir Menu">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -129,13 +178,19 @@
             <span>🧭</span>
             <span>Simulador de Vias</span>
           </button>
-          <button data-target="sec-ficha-atendimento" class="nav-btn w-full text-left px-3 py-2 rounded-lg font-bold text-slate-700 hover:bg-slate-100 transition flex items-center space-x-2.5">
-            <span>📝</span>
-            <span>Ficha de Atendimento</span>
+          <button data-target="sec-ficha-atendimento" class="nav-btn w-full text-left px-3 py-2 rounded-lg font-medium text-slate-600 hover:bg-slate-50 flex items-center justify-between transition">
+            <span class="flex items-center space-x-2.5">
+              <span>📝</span>
+              <span>Ficha de Atendimento</span>
+            </span>
+            <span class="lock-icon text-xs text-amber-600" title="Acesso restrito">🔒</span>
           </button>
-          <button data-target="sec-banco-atendimentos" class="nav-btn w-full text-left px-3 py-2 rounded-lg font-bold text-slate-700 hover:bg-slate-100 transition flex items-center space-x-2.5">
-            <span>🗄️</span>
-            <span>Banco de Atendimentos</span>
+          <button data-target="sec-banco-atendimentos" class="nav-btn w-full text-left px-3 py-2 rounded-lg font-medium text-slate-600 hover:bg-slate-50 flex items-center justify-between transition">
+            <span class="flex items-center space-x-2.5">
+              <span>🗄️</span>
+              <span>Banco de Atendimentos</span>
+            </span>
+            <span class="lock-icon text-xs text-amber-600" title="Acesso restrito">🔒</span>
           </button>
           <button data-target="sec-calculadora" class="nav-btn w-full text-left px-3 py-2 rounded-lg font-bold text-slate-700 hover:bg-slate-100 transition flex items-center space-x-2.5">
             <span>📅</span>
@@ -5710,37 +5765,6 @@ LADIR • Faculdade de Direito • FADIR / UFMS`;
       }
     };
   </script>
-  <!-- =====================================================================
-     FASE 3: LOGIN INSTITUCIONAL, NUVEM RELACIONAL & LGPD (PORTAL LADIR)
-     ===================================================================== -->
-<div id="auth-gate-ladir" class="auth-overlay">
-  <div class="auth-card">
-    <div class="auth-header">
-      <span class="badge-ufms">FADIR / UFMS • Campo Grande-MS</span>
-      <h2>Portal LADIR</h2>
-      <p>Laboratório de Acesso aos Direitos • Ambiente Seguro</p>
-    </div>
-
-    <form id="form-login-ladir">
-      <label for="email-ufms">E-mail Institucional</label>
-      <input type="email" id="email-ufms" placeholder="nome.sobrenome@ufms.br" required />
-
-      <label for="senha-ufms">Senha</label>
-      <input type="password" id="senha-ufms" placeholder="••••••••" required />
-
-      <div class="lgpd-notice">
-        <input type="checkbox" id="check-sigilo-lgpd" required />
-        <label for="check-sigilo-lgpd">
-          Declaro ciência do dever de sigilo profissional e conformidade com a <strong>LGPD (Lei 13.709/2018)</strong> quanto ao tratamento de dados pessoais e sensíveis dos assistidos.
-        </label>
-      </div>
-
-      <button type="submit" id="btn-submit-login" class="btn-primary-ufms">Acessar Sistema</button>
-      <p id="auth-error-msg" class="error-text" hidden></p>
-    </form>
-  </div>
-</div>
-
 <style>
   .auth-overlay {
     position: fixed; inset: 0; background: rgba(15, 23, 42, 0.92);
@@ -5849,29 +5873,90 @@ LADIR • Faculdade de Direito • FADIR / UFMS`;
     return data;
   };
 
-  // 4. Controle da Tela de Login e Sessão Ativa
-  const authGate = document.getElementById('auth-gate-ladir');
+  // 4. Controle de Login Não-Bloqueante e Proteção de Áreas Sensíveis
+  let usuarioAtualLadir = null;
+  let secaoPendenteLadir = null;
+  const SECOES_RESTRITAS = ['sec-ficha-atendimento', 'sec-banco-atendimentos'];
+
+  window.abrirModalLogin = function(secaoDestino = null) {
+    secaoPendenteLadir = secaoDestino;
+    const modal = document.getElementById('auth-modal');
+    const errorEl = document.getElementById('login-error');
+    if (errorEl) errorEl.classList.add('hidden');
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+  };
+
+  window.fecharModalLogin = function() {
+    const modal = document.getElementById('auth-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+    secaoPendenteLadir = null;
+  };
+
+  // Intercepta a função setActiveSection original para proteger as abas sensíveis
+  if (typeof window.setActiveSection === 'function') {
+    const _originalSetActiveSection = window.setActiveSection;
+    window.setActiveSection = function(sectionId) {
+      if (SECOES_RESTRITAS.includes(sectionId) && !usuarioAtualLadir) {
+        window.abrirModalLogin(sectionId);
+        return;
+      }
+      _originalSetActiveSection(sectionId);
+    };
+  }
+
+  // Também intercepta cliques nos botões do menu lateral/mobile para abas restritas
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-target]');
+    if (btn) {
+      const target = btn.getAttribute('data-target');
+      if (SECOES_RESTRITAS.includes(target) && !usuarioAtualLadir) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.abrirModalLogin(target);
+      }
+    }
+  }, true);
+
   ladirSupabase.auth.onAuthStateChange((event, session) => {
-    if (session && session.user) {
-      authGate.style.display = 'none';
-      console.log('LADIR Autenticado:', session.user.email);
+    usuarioAtualLadir = session?.user || null;
+    const btnOpenLogin = document.getElementById('btn-open-login');
+    const loggedBadge = document.getElementById('user-logged-badge');
+    const emailDisplay = document.getElementById('user-email-display');
+    const lockIcons = document.querySelectorAll('.lock-icon');
+
+    if (usuarioAtualLadir) {
+      btnOpenLogin?.classList.add('hidden');
+      loggedBadge?.classList.remove('hidden');
+      loggedBadge?.classList.add('flex');
+      if (emailDisplay) emailDisplay.textContent = usuarioAtualLadir.email;
+      lockIcons.forEach(el => el.classList.add('hidden'));
+      console.log('LADIR Autenticado:', usuarioAtualLadir.email);
     } else {
-      authGate.style.display = 'flex';
+      btnOpenLogin?.classList.remove('hidden');
+      loggedBadge?.classList.add('hidden');
+      loggedBadge?.classList.remove('flex');
+      lockIcons.forEach(el => el.classList.remove('hidden'));
     }
   });
 
-  document.getElementById('form-login-ladir').addEventListener('submit', async (e) => {
+  window.fazerLogin = async function(e) {
     e.preventDefault();
-    const errorEl = document.getElementById('auth-error-msg');
-    const btn = document.getElementById('btn-submit-login');
-    errorEl.hidden = true;
+    const errorEl = document.getElementById('login-error');
+    const btn = document.getElementById('btn-login-submit');
+    errorEl.classList.add('hidden');
 
-    const email = document.getElementById('email-ufms').value.trim();
-    const password = document.getElementById('senha-ufms').value;
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
 
     if (!email.endsWith('@ufms.br')) {
       errorEl.textContent = 'Acesso restrito: utilize seu e-mail institucional (@ufms.br).';
-      errorEl.hidden = false;
+      errorEl.classList.remove('hidden');
       return;
     }
 
@@ -5880,11 +5965,12 @@ LADIR • Faculdade de Direito • FADIR / UFMS`;
 
     const { data, error } = await ladirSupabase.auth.signInWithPassword({ email, password });
 
+    btn.disabled = false;
+    btn.textContent = 'Entrar no Sistema';
+
     if (error) {
       errorEl.textContent = 'E-mail ou senha inválidos.';
-      errorEl.hidden = false;
-      btn.disabled = false;
-      btn.textContent = 'Acessar Sistema';
+      errorEl.classList.remove('hidden');
       return;
     }
 
@@ -5893,8 +5979,23 @@ LADIR • Faculdade de Direito • FADIR / UFMS`;
       .update({ termo_lgpd_aceito: true, data_aceite_lgpd: new Date().toISOString() })
       .eq('id', data.user.id);
 
-    await window.registrarAuditoriaLGPD('LOGIN_PORTAL', null, `Acesso por ${email}`);
-  });
+    if (typeof window.registrarAuditoriaLGPD === 'function') {
+      await window.registrarAuditoriaLGPD('LOGIN_PORTAL', null, `Acesso por ${email}`);
+    }
+
+    const destino = secaoPendenteLadir;
+    window.fecharModalLogin();
+    if (destino && typeof window.setActiveSection === 'function') {
+      window.setActiveSection(destino);
+    }
+  };
+
+  window.fazerLogout = async function() {
+    await ladirSupabase.auth.signOut();
+    if (typeof window.setActiveSection === 'function') {
+      window.setActiveSection('sec-simulador');
+    }
+  };
 </script>
 </body>
 </html>
