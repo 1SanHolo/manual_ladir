@@ -42,6 +42,21 @@
     .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.2); border-radius: 4px; }
     .active-nav { background-color: #1b365d; color: #ffffff !important; }
     .active-wizard-btn { border-color: #1b365d !important; background-color: #f0f4f9 !important; font-weight: 700 !important; color: #1b365d !important; }
+    /* Impressão A4 Limpa Isolada */
+    @media print {
+      body { background-color: #ffffff !important; color: #000000 !important; }
+      header, aside, footer, #toast, #modal-checklist, #modal-appsscript, #painel-resultados-busca { display: none !important; }
+      body.imprimindo-documento-ladir > *:not(#folha-documento-impressao) { display: none !important; }
+      body.imprimindo-documento-ladir #folha-documento-impressao {
+        display: block !important;
+        visibility: visible !important;
+        position: static !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 12mm !important;
+        background: #ffffff !important;
+      }
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
@@ -69,19 +84,29 @@
         </div>
 
         <!-- Search Bar & Quick Actions -->
-        <div class="flex items-center space-x-3">
-          <div class="relative w-48 sm:w-64">
+        <div class="flex items-center space-x-2 sm:space-x-3">
+          <div class="relative w-48 sm:w-72">
             <input 
               type="text" 
               id="global-search" 
-              placeholder="Pesquisar termo..." 
-              class="w-full bg-white text-slate-800 placeholder-slate-400 text-xs sm:text-sm rounded-lg pl-8 pr-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500 border border-sky-300 shadow-inner transition"
+              oninput="executarBuscaGlobal(this.value)"
+              placeholder="Buscar serviço, órgão, frase..." 
+              class="w-full bg-white text-slate-800 placeholder-slate-400 text-xs sm:text-sm rounded-lg pl-8 pr-7 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500 border border-sky-300 shadow-inner transition"
               aria-label="Pesquisar termo"
             >
-            <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
+            <button id="btn-limpar-busca" onclick="limparBuscaGlobal()" class="hidden absolute right-2 top-1.5 text-slate-400 hover:text-slate-700 text-xs font-bold" title="Limpar busca">✕</button>
+
+            <!-- Dropdown de Resultados da Busca Global -->
+            <div id="painel-resultados-busca" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 max-h-96 overflow-y-auto custom-scrollbar p-2 space-y-1.5 text-xs"></div>
           </div>
+
+          <button onclick="setActiveSection('sec-simulador')" class="hidden lg:flex items-center space-x-1.5 text-xs font-bold text-brand-900 bg-white hover:bg-sky-50 border border-sky-300 px-3 py-1.5 rounded-lg transition shadow-2xs">
+            <span>🧭</span>
+            <span>Nova Triagem</span>
+          </button>
           <button id="toggle-mobile-menu" class="md:hidden p-2 text-slate-700 hover:text-brand-900 hover:bg-sky-200/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400" aria-label="Abrir Menu">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -401,8 +426,10 @@
               <span>💾</span>
               <span>Salvar Atendimento no Banco</span>
             </button>
-            <button onclick="imprimirFichaAtendimento()" class="px-3 py-1.5 bg-brand-800 hover:bg-brand-900 text-white text-xs font-semibold rounded-lg transition shadow-2xs flex items-center space-x-1.5">
-              <span>🖨️</span>
+            <button onclick="propagarFichaParaGeradores(true)" class="px-3 py-1.5 bg-sky-700 hover:bg-sky-800 text-white text-xs font-semibold rounded-lg transition shadow-2xs flex items-center space-x-1.5">
+              <span>⚡</span>
+              <span>Usar Dados nos Geradores</span>
+            </button>
               <span>Imprimir Ficha (A4)</span>
             </button>
             <button onclick="limparFichaAtendimento()" class="px-3 py-1.5 bg-white hover:bg-red-50 text-red-600 text-xs font-semibold rounded-lg border border-red-200 transition shadow-2xs flex items-center space-x-1.5">
@@ -2690,7 +2717,10 @@
 
           <div class="mt-3">
             <textarea id="gen-res-output" rows="7" class="w-full p-3 bg-slate-900 text-slate-100 font-mono text-xs rounded-lg border border-slate-700" readonly placeholder="O texto gerado aparecerá aqui..."></textarea>
-            <button onclick="copyGeneratedText('gen-res-output')" class="mt-2 text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded transition">Copiar Declaração</button>
+            <div class="flex space-x-2 mt-2">
+              <button onclick="copyGeneratedText('gen-res-output')" class="text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded transition">Copiar Declaração</button>
+              <button onclick="imprimirDocumentoGerado('gen-res-output', 'DECLARAÇÃO DE RESIDÊNCIA')" class="text-xs bg-brand-800 hover:bg-brand-900 text-white px-3 py-1.5 rounded transition font-semibold">🖨️ Imprimir (A4)</button>
+            </div>
           </div>
         </div>
 
@@ -2717,7 +2747,10 @@
           <button onclick="generateFiliacaoText()" class="px-4 py-2 bg-brand-800 hover:bg-brand-900 text-white font-medium text-xs rounded-lg transition">Gerar Autodeclaração de Filiação</button>
           <div class="mt-3">
             <textarea id="gen-fil-output" rows="8" class="w-full p-3 bg-slate-900 text-slate-100 font-mono text-xs rounded-lg border border-slate-700" readonly placeholder="A declaração de filiação aparecerá aqui..."></textarea>
-            <button onclick="copyGeneratedText('gen-fil-output')" class="mt-2 text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded transition">Copiar Autodeclaração</button>
+            <div class="flex space-x-2 mt-2">
+              <button onclick="copyGeneratedText('gen-fil-output')" class="text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded transition">Copiar Autodeclaração</button>
+              <button onclick="imprimirDocumentoGerado('gen-fil-output', 'AUTODECLARAÇÃO DE FILIAÇÃO')" class="text-xs bg-brand-800 hover:bg-brand-900 text-white px-3 py-1.5 rounded transition font-semibold">🖨️ Imprimir (A4)</button>
+            </div>
           </div>
         </div>
 
@@ -2736,7 +2769,10 @@
           <button onclick="generateHipoText()" class="px-4 py-2 bg-brand-800 hover:bg-brand-900 text-white font-medium text-xs rounded-lg transition">Gerar Termo de Hipossuficiência</button>
           <div class="mt-3">
             <textarea id="gen-hipo-output" rows="6" class="w-full p-3 bg-slate-900 text-slate-100 font-mono text-xs rounded-lg border border-slate-700" readonly placeholder="O texto gerado aparecerá aqui..."></textarea>
-            <button onclick="copyGeneratedText('gen-hipo-output')" class="mt-2 text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded transition">Copiar Termo</button>
+            <div class="flex space-x-2 mt-2">
+              <button onclick="copyGeneratedText('gen-hipo-output')" class="text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded transition">Copiar Termo</button>
+              <button onclick="imprimirDocumentoGerado('gen-hipo-output', 'DECLARAÇÃO DE HIPOSSUFICIÊNCIA ECONÔMICA')" class="text-xs bg-brand-800 hover:bg-brand-900 text-white px-3 py-1.5 rounded transition font-semibold">🖨️ Imprimir (A4)</button>
+            </div>
           </div>
         </div>
 
@@ -2755,7 +2791,10 @@
           <button onclick="generateBancoText()" class="px-4 py-2 bg-brand-800 hover:bg-brand-900 text-white font-medium text-xs rounded-lg transition">Gerar Ofício de Apoio Bancário (Res. BCB 4.753/19)</button>
           <div class="mt-3">
             <textarea id="gen-banco-output" rows="8" class="w-full p-3 bg-slate-900 text-slate-100 font-mono text-xs rounded-lg border border-slate-700" readonly placeholder="O ofício gerado aparecerá aqui..."></textarea>
-            <button onclick="copyGeneratedText('gen-banco-output')" class="mt-2 text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded transition">Copiar Ofício</button>
+            <div class="flex space-x-2 mt-2">
+              <button onclick="copyGeneratedText('gen-banco-output')" class="text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded transition">Copiar Ofício</button>
+              <button onclick="imprimirDocumentoGerado('gen-banco-output', 'OFÍCIO DE APOIO BANCÁRIO')" class="text-xs bg-brand-800 hover:bg-brand-900 text-white px-3 py-1.5 rounded transition font-semibold">🖨️ Imprimir (A4)</button>
+            </div>
           </div>
         </div>
       </section>
@@ -3243,7 +3282,18 @@ function doGet(e) {
   <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-2.5 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50">
     Texto copiado com sucesso!
   </div>
-
+<!-- Folha Timbrada Isolada para Impressão A4 -->
+  <div id="folha-documento-impressao" class="hidden bg-white text-slate-900 font-sans text-xs leading-relaxed">
+    <div style="border-bottom: 2px solid #1b365d; padding-bottom: 10px; margin-bottom: 18px; text-align: center;">
+      <p style="font-size: 9pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #475569; margin: 0;">Universidade Federal de Mato Grosso do Sul • Faculdade de Direito (FADIR)</p>
+      <h2 style="font-size: 13pt; font-weight: 800; color: #0f2038; margin: 4px 0;">LADIR – LIGA ACADÊMICA DE DIREITO INTERNACIONAL DOS REFUGIADOS</h2>
+      <p style="font-size: 9pt; color: #475569; margin: 0;">Cátedra Sérgio Vieira de Mello (CSVM / ACNUR Brasil) • Posto Campo Grande - MS</p>
+      <div style="display: inline-block; margin-top: 8px; padding: 4px 12px; background: #f0f4f9; border: 1px solid #cbd5e1; border-radius: 4px;">
+        <span id="print-doc-titulo" style="font-size: 9.5pt; font-weight: bold; color: #1b365d; text-transform: uppercase;">DOCUMENTO OFICIAL</span>
+      </div>
+    </div>
+    <pre id="print-doc-corpo" style="white-space: pre-wrap; font-family: inherit; font-size: 10.5pt; line-height: 1.6; color: #0f172a; margin: 0;"></pre>
+  </div>
   <!-- Footer -->
   <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto px-4">
@@ -5253,6 +5303,412 @@ Por: _________________________________________________ Cargo/Matrícula: _______
       if (type === 'hipossuficiencia') switchGenTab('tab-hipo');
       if (type === 'banco') switchGenTab('tab-banco');
     }
+    // ==========================================
+    // FASE 1: GERADORES COMPLEMENTARES + IMPRESSÃO A4 + BUSCA GLOBAL
+    // ==========================================
+
+    function generateEmailRFBText() {
+      const nome = document.getElementById('gen-email-nome')?.value.trim() || '[NOME COMPLETO DO ASSISTIDO]';
+      const nasc = document.getElementById('gen-email-nasc')?.value.trim() || '[DD/MM/AAAA]';
+      const mae = document.getElementById('gen-email-mae')?.value.trim() || '[NOME COMPLETO DA MÃE]';
+      const doc = document.getElementById('gen-email-doc')?.value.trim() || '[DOCUMENTO E NÚMERO]';
+      const tel = document.getElementById('gen-email-tel')?.value.trim() || '[TELEFONE COM DDD]';
+      const proto = document.getElementById('gen-email-proto')?.value.trim() || '[PROTOCOLO FCPF]';
+      const end = document.getElementById('gen-email-end')?.value.trim() || '[ENDEREÇO EM CAMPO GRANDE - MS]';
+
+      const text = `ASSUNTO: Solicitação de Inscrição / Regularização de CPF de Estrangeiro – Protocolo FCPF ${proto} – ${nome}
+
+À Equipe de Atendimento da Receita Federal do Brasil – 1ª Região Fiscal (RFB),
+
+Prezados(as) Senhores(as),
+
+Por meio do apoio extensionista da LADIR (Liga Acadêmica de Direito Internacional dos Refugiados da Faculdade de Direito da UFMS), encaminha-se a documentação comprobatória referente ao pedido de inscrição/regularização no Cadastro de Pessoas Físicas (CPF) do(a) cidadão(ã) estrangeiro(a) abaixo qualificado(a):
+
+• Nome Completo: ${nome}
+• Data de Nascimento: ${nasc}
+• Filiação (Mãe): ${mae}
+• Documento de Identificação: ${doc}
+• Protocolo de Atendimento FCPF: ${proto}
+• Telefone / WhatsApp: ${tel}
+• Endereço Residencial: ${end}
+
+DOCUMENTOS ANEXADOS (PDF ÚNICO / COMPRIMIDO):
+1. Protocolo de Atendimento FCPF gerado no portal da Receita Federal;
+2. Declaração de Condição Fiscal assinada;
+3. Cópia do Documento de Identificação com foto (${doc});
+4. Comprovante de filiação / Autodeclaração de Filiação;
+5. Comprovante / Declaração de Residência (Lei nº 7.115/1983);
+6. Fotografia (Selfie) do titular segurando o documento aberto ao lado do rosto.
+
+Colocamo-nos à disposição para eventuais complementações.
+
+Atenciosamente,
+${nome}
+(Com apoio da LADIR • Faculdade de Direito • FADIR / UFMS)`;
+
+      const out = document.getElementById('gen-email-output');
+      if (out) out.value = text;
+      showToast('Mensagem de e-mail para a Receita Federal gerada!');
+    }
+
+    function generateResidenciaText() {
+      const nome = document.getElementById('gen-res-nome')?.value.trim() || '[NOME COMPLETO DO ASSISTIDO]';
+      const nacio = document.getElementById('gen-res-nacio')?.value.trim() || '[NACIONALIDADE]';
+      const doc = document.getElementById('gen-res-doc')?.value.trim() || '[DOCUMENTO E NÚMERO]';
+      const cpf = document.getElementById('gen-res-cpf')?.value.trim() || '[CPF / EM EMISSÃO]';
+      const end = document.getElementById('gen-res-end')?.value.trim() || '[ENDEREÇO COMPLETO EM CAMPO GRANDE - MS]';
+      const hoje = new Date().toLocaleDateString('pt-BR');
+
+      const text = `DECLARAÇÃO DE RESIDÊNCIA
+(Nos termos da Lei Federal nº 7.115, de 29 de agosto de 1983)
+
+Eu, ${nome}, nacionalidade ${nacio}, portador(a) do documento de identidade nº ${doc}, inscrito(a) no CPF sob o nº ${cpf}, DECLARO, para os devidos fins de comprovação de endereço junto a órgãos públicos, instituições financeiras e entidades privadas, que resido e sou domiciliado(a) no seguinte endereço:
+
+${end}
+
+Declaro ainda estar ciente de que a falsidade das informações prestadas nesta declaração sujeitará o(a) declarante às sanções civis, administrativas e criminais previstas na legislação brasileira (art. 2º da Lei nº 7.115/1983 e art. 299 do Código Penal).
+
+Por ser expressão da verdade, firmo a presente declaração.
+
+Campo Grande – MS, ${hoje}.
+
+
+____________________________________________________________
+${nome}
+Declarante`;
+
+      const out = document.getElementById('gen-res-output');
+      if (out) out.value = text;
+      showToast('Declaração de Residência gerada!');
+    }
+
+    function generateFiliacaoText() {
+      const nome = document.getElementById('gen-fil-nome')?.value.trim() || '[NOME COMPLETO DO ASSISTIDO]';
+      const doc = document.getElementById('gen-fil-doc')?.value.trim() || '[NACIONALIDADE E DOCUMENTO]';
+      const mae = document.getElementById('gen-fil-mae')?.value.trim() || '[NOME COMPLETO DA MÃE]';
+      const pai = document.getElementById('gen-fil-pai')?.value.trim() || 'Não consta / Não declarado';
+      const hoje = new Date().toLocaleDateString('pt-BR');
+
+      const text = `AUTODECLARAÇÃO DE FILIAÇÃO
+(Instrução Normativa RFB • Inscrição no Cadastro de Pessoas Físicas – CPF)
+
+Eu, ${nome}, ${doc}, DECLARO, sob as penas da lei (art. 299 do Código Penal Brasileiro) e para fins de inscrição e atualização cadastral no Cadastro de Pessoas Físicas (CPF) perante a Receita Federal do Brasil, que minha filiação completa é:
+
+• Nome Completo da Mãe: ${mae}
+• Nome Completo do Pai: ${pai}
+
+Declaro que o documento de identificação estrangeiro apresentado não exibe os nomes dos genitores (ou não disponho no momento de certidão consular/nascimento traduzida), razão pela qual presto a presente autodeclaração como expressão fiel da verdade.
+
+Campo Grande – MS, ${hoje}.
+
+
+____________________________________________________________
+${nome}
+Declarante`;
+
+      const out = document.getElementById('gen-fil-output');
+      if (out) out.value = text;
+      showToast('Autodeclaração de Filiação gerada!');
+    }
+
+    function generateHipoText() {
+      const nome = document.getElementById('gen-hipo-nome')?.value.trim() || '[NOME COMPLETO DO ASSISTIDO]';
+      const doc = document.getElementById('gen-hipo-doc')?.value.trim() || '[DOCUMENTO DE IDENTIDADE]';
+      const hoje = new Date().toLocaleDateString('pt-BR');
+
+      const text = `DECLARAÇÃO DE HIPOSSUFICIÊNCIA ECONÔMICA
+(Art. 312 do Decreto Federal nº 9.199/2017 e Portaria MJ nº 218/2018)
+
+À DELEGACIA DE POLÍCIA FEDERAL EM CAMPO GRANDE – MS (DELEMIG / NRE)
+
+Eu, ${nome}, portador(a) do documento de identificação nº ${doc}, DECLARO, sob as penas da lei e para fins de isenção integral do pagamento de taxas de processamento, avaliação e emissão de Carteira de Registro Nacional Migratório (CRNM) ou autorização de residência, que não possuo condições econômicas de arcar com os valores das taxas migratórias sem prejuízo do meu próprio sustento e de minha família.
+
+Requeiro, portanto, o reconhecimento da gratuidade assegurada pelo art. 4º, inciso XII, da Lei nº 13.445/2017 (Lei de Migração) e pelo art. 312 do Decreto nº 9.199/2017.
+
+Campo Grande – MS, ${hoje}.
+
+
+____________________________________________________________
+${nome}
+Requerente`;
+
+      const out = document.getElementById('gen-hipo-output');
+      if (out) out.value = text;
+      showToast('Declaração de Hipossuficiência gerada!');
+    }
+
+    function generateBancoText() {
+      const nome = document.getElementById('gen-banco-nome')?.value.trim() || '[NOME COMPLETO DO MIGRANTE]';
+      const doc = document.getElementById('gen-banco-doc')?.value.trim() || '[PROTOCOLO / DPRNM E CPF]';
+      const hoje = new Date().toLocaleDateString('pt-BR');
+
+      const text = `OFÍCIO DE APRESENTAÇÃO E APOIO À INCLUSÃO BANCÁRIA
+(Resolução BCB nº 4.753/2019 • Carta-Circular Bacen nº 3.813/2017)
+
+AO(À) ILUSTRÍSSIMO(A) SENHOR(A) GERENTE DE ATENDIMENTO BANCÁRIO
+
+Prezados(as) Senhores(as),
+
+A Liga Acadêmica de Direito Internacional dos Refugiados (LADIR), projeto de extensão vinculado à Faculdade de Direito da Universidade Federal de Mato Grosso do Sul (FADIR/UFMS), apresenta o(a) cidadão(ã) ${nome}, portador(a) de ${doc}, que comparece a esta agência bancária para solicitar a abertura de conta de depósitos (corrente ou poupança).
+
+Esclarecemos que, nos termos da Resolução BCB nº 4.753/2019 e da Carta-Circular Bacen nº 3.813/2017 (bem como do Ofício-Circular nº 11/2019-BCB/Disic), o Protocolo de Solicitação de Refúgio, o Documento Provisório de Registro Nacional Migratório (DPRNM) e o Protocolo do RNM constituem documentos de identidade civil plenamente válidos em todo o território nacional para abertura e movimentação de contas bancárias, sendo vedada qualquer recusa discriminatória.
+
+Campo Grande – MS, ${hoje}.
+
+
+____________________________________________________________
+Equipe de Atendimento Extensionista
+LADIR • Faculdade de Direito • FADIR / UFMS`;
+
+      const out = document.getElementById('gen-banco-output');
+      if (out) out.value = text;
+      showToast('Ofício de Apoio Bancário gerado!');
+    }
+
+    function imprimirDocumentoGerado(textareaId, tituloDoc) {
+      const el = document.getElementById(textareaId);
+      if (!el || !el.value.trim()) {
+        showToast('Gere o documento primeiro antes de imprimir!');
+        return;
+      }
+      const tituloEl = document.getElementById('print-doc-titulo');
+      const corpoEl = document.getElementById('print-doc-corpo');
+      if (tituloEl) tituloEl.textContent = tituloDoc;
+      if (corpoEl) corpoEl.textContent = el.value;
+
+      document.body.classList.add('imprimindo-documento-ladir');
+      window.print();
+      setTimeout(() => document.body.classList.remove('imprimindo-documento-ladir'), 800);
+    }
+
+    function executarBuscaGlobal(termoBruto) {
+      const painel = document.getElementById('painel-resultados-busca');
+      const btnLimpar = document.getElementById('btn-limpar-busca');
+      if (!painel) return;
+
+      const termo = (termoBruto || '').toLowerCase().trim();
+      if (btnLimpar) btnLimpar.classList.toggle('hidden', termo.length === 0);
+
+      if (termo.length < 2) {
+        painel.classList.add('hidden');
+        painel.innerHTML = '';
+        return;
+      }
+
+      const resultados = [];
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const nomeModulo = btn.textContent.trim();
+        const secId = btn.dataset.target;
+        const secEl = document.getElementById(secId);
+        const textoSec = secEl ? secEl.innerText.toLowerCase() : '';
+        if (nomeModulo.toLowerCase().includes(termo) || textoSec.includes(termo)) {
+          resultados.push({
+            tipo: 'Módulo do Guia',
+            titulo: nomeModulo,
+            sub: 'Clique para abrir esta seção',
+            acao: () => { setActiveSection(secId); limparBuscaGlobal(); }
+          });
+        }
+      });
+
+      document.querySelectorAll('#sec-contatos h3').forEach(h3 => {
+        const card = h3.closest('.rounded-xl');
+        if (card && card.innerText.toLowerCase().includes(termo)) {
+          resultados.push({
+            tipo: '📍 Rede Campo Grande',
+            titulo: h3.textContent.trim(),
+            sub: 'Ver endereço, telefone e e-mail',
+            acao: () => { setActiveSection('sec-contatos'); limparBuscaGlobal(); }
+          });
+        }
+      });
+
+      document.querySelectorAll('#spanish-qa-container > div').forEach(card => {
+        if (card.innerText.toLowerCase().includes(termo)) {
+          const tag = card.querySelector('span')?.textContent || 'Espanhol';
+          const frase = card.querySelector('p.text-sm')?.textContent || '';
+          resultados.push({
+            tipo: '🗣️ Espanhol (' + tag + ')',
+            titulo: frase.slice(0, 75) + '...',
+            sub: 'Ir para Perguntas em Espanhol',
+            acao: () => { setActiveSection('sec-espanhol'); limparBuscaGlobal(); }
+          });
+        }
+      });
+
+      if (resultados.length === 0) {
+        painel.innerHTML = `<div class="p-3 text-center text-slate-500">Nenhum resultado encontrado para "<strong>${termo}</strong>".</div>`;
+      } else {
+        painel.innerHTML = resultados.slice(0, 10).map((r, idx) => `
+          <button type="button" data-res-idx="${idx}" class="item-busca-res w-full text-left p-2.5 rounded-lg hover:bg-sky-50 border border-transparent hover:border-sky-200 transition block">
+            <span class="text-[10px] font-bold uppercase text-accent-600 block">${r.tipo}</span>
+            <span class="font-bold text-slate-900 block truncate">${r.titulo}</span>
+            <span class="text-[11px] text-slate-500">${r.sub}</span>
+          </button>
+        `).join('');
+
+        painel.querySelectorAll('.item-busca-res').forEach((btn, i) => {
+          btn.addEventListener('click', resultados[i].acao);
+        });
+      }
+
+      painel.classList.remove('hidden');
+    }
+
+    function limparBuscaGlobal() {
+      const input = document.getElementById('global-search');
+      const painel = document.getElementById('painel-resultados-busca');
+      const btnLimpar = document.getElementById('btn-limpar-busca');
+      if (input) input.value = '';
+      if (painel) painel.classList.add('hidden');
+      if (btnLimpar) btnLimpar.classList.add('hidden');
+    }
+    // ==========================================
+    // FASE 2: PROPAGAÇÃO AUTOMÁTICA (SIMULADOR ➔ FICHA ➔ GERADORES)
+    // ==========================================
+
+    function formatarDataParaBr(isoStr) {
+      if (!isoStr || !isoStr.includes('-')) return isoStr || '';
+      const p = isoStr.split('-');
+      return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : isoStr;
+    }
+
+    function propagarFichaParaGeradores(exibirAviso = false) {
+      const getV = id => (document.getElementById(id)?.value || '').trim();
+
+      const nome = getV('fa-nome');
+      const nacio = getV('fa-nacionalidade') || getV('fa-pais-origem');
+      const idioma = getV('fa-idioma');
+      const doc = getV('fa-doc-origem');
+      const cpf = getV('fa-cpf');
+      const tel = getV('fa-telefone');
+      const end = getV('fa-endereco');
+      const nascBr = formatarDataParaBr(getV('fa-data-nasc'));
+      const academico = getV('fa-academico-nome');
+
+      const setIfVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el && val) el.value = val;
+      };
+
+      // 1. Ficha de Encaminhamento
+      setIfVal('gen-enc-nome', nome);
+      setIfVal('gen-enc-nacio', nacio);
+      setIfVal('gen-enc-idioma', idioma);
+      setIfVal('gen-enc-doc', doc);
+      setIfVal('gen-enc-cpf', cpf);
+      setIfVal('gen-enc-tel', tel);
+      setIfVal('gen-enc-end', end);
+      setIfVal('gen-enc-academico', academico);
+
+      // 2. Notificação Extrajudicial
+      setIfVal('gen-notif-nome', nome);
+      setIfVal('gen-notif-nacio', nacio);
+      setIfVal('gen-notif-doc', doc);
+      setIfVal('gen-notif-cpf', cpf);
+      setIfVal('gen-notif-tel', tel);
+
+      // 3. E-mail Receita Federal (CPF)
+      setIfVal('gen-email-nome', nome);
+      setIfVal('gen-email-nasc', nascBr);
+      setIfVal('gen-email-doc', doc);
+      setIfVal('gen-email-tel', tel);
+      setIfVal('gen-email-end', end);
+
+      // 4. Declaração de Residência
+      setIfVal('gen-res-nome', nome);
+      setIfVal('gen-res-nacio', nacio);
+      setIfVal('gen-res-doc', doc);
+      setIfVal('gen-res-cpf', cpf);
+      setIfVal('gen-res-end', end);
+
+      // 5. Autodeclaração de Filiação
+      setIfVal('gen-fil-nome', nome);
+      setIfVal('gen-fil-doc', (nacio && doc) ? `${nacio}, ${doc}` : (doc || nacio));
+
+      // 6. Hipossuficiência (PF)
+      setIfVal('gen-hipo-nome', nome);
+      setIfVal('gen-hipo-doc', doc);
+
+      // 7. Encaminhamento Bancário
+      setIfVal('gen-banco-nome', nome);
+      const docBanco = [doc, cpf ? `CPF ${cpf}` : ''].filter(Boolean).join(' / ');
+      setIfVal('gen-banco-doc', docBanco);
+
+      if (exibirAviso) {
+        if (!nome) {
+          showToast('Preencha ao menos o Nome na Ficha antes de propagar!');
+        } else {
+          setActiveSection('sec-geradores');
+          showToast(`Dados de ${nome} carregados em todos os 7 geradores!`);
+        }
+      }
+    }
+
+    // Aprimora salvarAtendimentoNoBanco e carregarAtendimentoParaFicha para propagar automaticamente
+    const _salvarAtendimentoOriginal = salvarAtendimentoNoBanco;
+    salvarAtendimentoNoBanco = function() {
+      _salvarAtendimentoOriginal();
+      propagarFichaParaGeradores(false);
+    };
+
+    const _carregarAtendimentoOriginal = carregarAtendimentoParaFicha;
+    carregarAtendimentoParaFicha = function(protocolo) {
+      _carregarAtendimentoOriginal(protocolo);
+      propagarFichaParaGeradores(false);
+    };
+
+    // Aprimora importarSimuladorParaFicha para marcar também os rádios do Bloco III
+    const _importarSimuladorOriginal = importarSimuladorParaFicha;
+    importarSimuladorParaFicha = function() {
+      _importarSimuladorOriginal();
+
+      // Marca automaticamente a Pretensão de Viagem no Bloco III
+      if (simState.viagem === true) {
+        const rSim = document.querySelector('input[name="fa-pretende-viagem"][value*="Sim"]');
+        if (rSim) rSim.checked = true;
+      } else if (simState.viagem === false) {
+        const rNao = document.querySelector('input[name="fa-pretende-viagem"][value*="Não"]');
+        if (rNao) rNao.checked = true;
+      }
+
+      // Marca automaticamente o Motivo Primordial da Saída no Bloco III
+      if (simState.risco === true) {
+        const motivoAlvo = simState.nacionalidade === 'humanitaria'
+          ? 'Grave e generalizada violação de direitos humanos (Cartagena / Art. 1º, III da Lei 9.474/97)'
+          : 'Perseguição individual (opinião política, raça, religião, grupo social - Art. 1º, I)';
+        const rMotivo = document.querySelector(`input[name="fa-motivo-saida"][value="${motivoAlvo}"]`);
+        if (rMotivo) rMotivo.checked = true;
+      } else if (simState.familia === true) {
+        const rFam = document.querySelector('input[name="fa-motivo-saida"][value="Reunificação e convivência familiar no Brasil"]');
+        if (rFam) rFam.checked = true;
+      } else if (simState.risco === false) {
+        const rTrab = document.querySelector('input[name="fa-motivo-saida"][value="Migração econômica, busca de emprego e subsistência digna"]');
+        if (rTrab) rTrab.checked = true;
+      }
+    };
+
+    // Injeta botão "Levar Diagnóstico para Ficha" no resultado do Simulador
+    const _calcularSimuladorOriginal = calcularSimulador;
+    calcularSimulador = function() {
+      _calcularSimuladorOriginal();
+      const resBox = document.getElementById('sim-resultado');
+      if (!resBox || resBox.classList.contains('hidden')) return;
+      const barraAcoes = resBox.querySelector('.flex.flex-wrap.items-center.gap-2');
+      if (barraAcoes && !document.getElementById('btn-sim-levar-ficha')) {
+        const btnFicha = document.createElement('button');
+        btnFicha.id = 'btn-sim-levar-ficha';
+        btnFicha.type = 'button';
+        btnFicha.className = 'px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-lg transition shadow-sm';
+        btnFicha.innerHTML = '📝 Levar Diagnóstico para Ficha';
+        btnFicha.onclick = function() {
+          setActiveSection('sec-ficha-atendimento');
+          importarSimuladorParaFicha();
+        };
+        barraAcoes.insertBefore(btnFicha, barraAcoes.firstChild);
+      }
+    };
   </script>
 </body>
 </html>
