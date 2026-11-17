@@ -3458,23 +3458,6 @@ function doGet(e) {
       });
     });
 
-      sections.forEach(s => {
-        if (s.id === targetId) {
-          s.classList.remove('hidden');
-        } else {
-          s.classList.add('hidden');
-        }
-      });
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    navButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        setActiveSection(btn.dataset.target);
-      });
-    });
-
     // Mobile menu toggle
     const toggleMobileBtn = document.getElementById('toggle-mobile-menu');
     const sidebar = document.getElementById('sidebar-nav');
