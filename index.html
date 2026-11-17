@@ -2482,119 +2482,144 @@
           <button onclick="switchGenTab('tab-banco')" id="btn-tab-banco" class="gen-tab-btn px-3 py-2 text-xs font-bold text-slate-500 hover:text-brand-800 border-b-2 border-transparent shrink-0">Encaminhamento Bancário</button>
         </div>
 
-        <!-- TAB: FICHA DE ENCAMINHAMENTO INTERINSTITUCIONAL -->
-        <div id="tab-encaminhamento" class="gen-tab-pane space-y-4">
-          <div class="p-3 rounded-lg bg-blue-50/80 border border-blue-200 text-xs text-blue-900 leading-relaxed">
-            <strong>Finalidade desta Ficha:</strong> O assistido pode apresentar dificuldades com a língua portuguesa ou com jargões burocráticos. Esta ficha formal é emitida pela LADIR/UFMS para ser <strong>entregue diretamente em mãos ao servidor ou atendente do órgão destinatário</strong>, expondo com precisão técnica a demanda, os dados do migrante e a fundamentação legal que assegura o direito.
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
-            <div class="sm:col-span-2 lg:col-span-2">
-              <label class="block font-semibold text-slate-700 mb-1">Órgão / Instituição de Destino:</label>
-              <select id="gen-enc-orgao" onchange="checkCustomOrgao()" class="w-full p-2 border border-slate-300 rounded focus:ring-1 focus:ring-brand-800 text-xs bg-white">
-                <option value="CRAS / SAS (Secretaria Municipal de Assistência Social)">CRAS / SAS (Inscrição / Atualização no CadÚnico & Benefícios Sociais)</option>
-                <option value="Casa de Passagem Resgate - Unidade II (Rua Maracaju, 229 • Centro / SAS)">Casa de Passagem Resgate (Acolhimento Temporário, Pernoite & Alimentação)</option>
-                <option value="UBS / Posto de Saúde (Secretaria Municipal de Saúde - SESAU)">UBS / Posto de Saúde (Cartão SUS, Vacinação & Consultas Médicas)</option>
-                <option value="FUNSAT (Fundação Social do Trabalho de Campo Grande)">FUNSAT (Vagas de Emprego, Trabalho Formal & CTPS Digital)</option>
-                <option value="Delegacia da Receita Federal em Campo Grande (DRF)">Receita Federal (Inscrição, Regularização & Emissão de CPF)</option>
-                <option value="Delegacia de Imigração da Polícia Federal (DELEMIG/MS)">Polícia Federal - DELEMIG (Coleta Biométrica, Refúgio & CRNM)</option>
-                <option value="Defensoria Pública da União (DPU/MS)">Defensoria Pública da União - DPU (Assistência Jurídica Federal)</option>
-                <option value="DPE/MS • Unidade Belmar (Família, Guarda, Alimentos & Direitos Humanos - Rua Arthur Jorge, 779)">DPE/MS • Unidade Belmar (Família, Guarda de Menores & Direitos Humanos)</option>
-                <option value="DPE/MS • Unidade Afonso Pena (Mulher Vítima de Violência & Infância e Juventude - Av. Afonso Pena, 3.850)">DPE/MS • Unidade Afonso Pena (NUDEM - Mulher & NUDECA - Infância)</option>
-                <option value="DPE/MS • Unidade Centro (Cível, Consumidor & Fazenda Pública - Rua Antônio Maria Coelho, 1.668)">DPE/MS • Unidade Centro (Cível Geral, Registro Tardio & Consumidor)</option>
-                <option value="DPE/MS • Unidade Barão de Melgaço (Saúde Pública & Execução Penal - Rua Barão de Melgaço, 128)">DPE/MS • Unidade Barão de Melgaço (NAS - Medicamentos/Cirurgias SUS)</option>
-                <option value="Secretaria Municipal/Estadual de Educação (Escola)">Secretaria de Educação / Escola (Matrícula Escolar de Crianças e Jovens)</option>
-                <option value="INSS (Instituto Nacional do Seguro Social)">INSS (Benefícios Previdenciários / BPC-LOAS)</option>
-                <option value="Outro">Outro Órgão / Destinatário Personalizado</option>
-              </select>
-            </div>
-
-            <div id="box-enc-orgao-custom" class="hidden sm:col-span-2 lg:col-span-1">
-              <label class="block font-semibold text-slate-700 mb-1">Especifique o Órgão de Destino:</label>
-              <input type="text" id="gen-enc-orgao-custom" placeholder="Ex: Conselho Tutelar Norte" class="w-full p-2 border border-slate-300 rounded text-xs">
-            </div>
-
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Nome Completo do Assistido:</label>
-              <input type="text" id="gen-enc-nome" placeholder="Ex: Jean Luc Pierre" class="w-full p-2 border border-slate-300 rounded text-xs">
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Nacionalidade:</label>
-              <input type="text" id="gen-enc-nacio" placeholder="Ex: Haitiana / Venezuelana" class="w-full p-2 border border-slate-300 rounded text-xs">
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Idioma Materno:</label>
-              <input type="text" id="gen-enc-idioma" placeholder="Ex: Espanhol / Crioulo Haitiano" class="w-full p-2 border border-slate-300 rounded text-xs font-semibold text-brand-800">
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Documento e Número:</label>
-              <input type="text" id="gen-enc-doc" placeholder="Ex: Passaporte / DNI / Protocolo nº..." class="w-full p-2 border border-slate-300 rounded text-xs">
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">CPF (se houver):</label>
-              <input type="text" id="gen-enc-cpf" placeholder="Ex: 000.000.000-00 ou Em emissão" class="w-full p-2 border border-slate-300 rounded text-xs">
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Telefone / WhatsApp com DDD:</label>
-              <input type="text" id="gen-enc-tel" placeholder="Ex: (67) 99999-9999" class="w-full p-2 border border-slate-300 rounded text-xs">
-            </div>
-            <div class="sm:col-span-2 lg:col-span-3">
-              <label class="block font-semibold text-slate-700 mb-1">Endereço Residencial em Campo Grande:</label>
-              <input type="text" id="gen-enc-end" placeholder="Ex: Rua das Palmeiras, 120, Bairro Aero Rancho, Campo Grande - MS" class="w-full p-2 border border-slate-300 rounded text-xs">
-            </div>
-
-            <div class="sm:col-span-2 lg:col-span-2">
-              <label class="block font-semibold text-slate-700 mb-1">Modelo de Demanda Pré-Configurado:</label>
-              <select id="gen-enc-preset" onchange="applyPresetDemanda()" class="w-full p-2 border border-slate-300 rounded text-xs bg-white">
-                <option value="">Selecione um modelo rápido ou escreva livremente...</option>
-                <option value="cadunico">CadÚnico: Inclusão da família no Cadastro Único</option>
-                <option value="abrigo_maracaju">Casa de Passagem (Rua Maracaju): Acolhimento institucional temporário de emergência</option>
-                <option value="cedami">CEDAMI / Pastoral do Migrante: Acolhimento humanitário e assistência social</option>
-                <option value="cerma_cetrap">CERMA / CETRAP: Proteção especial contra tráfico e trabalho escravo</option>
-                <option value="sus">SUS / Saúde: Emissão do Cartão Nacional de Saúde e atendimento primário</option>
-                <option value="funsat">FUNSAT: Intermediação de vagas de emprego formal e CTPS Digital</option>
-                <option value="escola">Educação: Matrícula compulsória e imediata de menor em idade escolar (art. 205, CF/88)</option>
-                <option value="transporte_cidadao">Transporte Coletivo: Emissão do Cartão Cidadão com integração temporal</option>
-                <option value="transporte_estudante">Transporte Coletivo: Emissão do Passe do Estudante Gratuito</option>
-                <option value="tarifa_luz">Tarifa Social de Energia Elétrica: Desconto na conta de luz (Energisa MS)</option>
-                <option value="tarifa_agua">Tarifa Social de Água e Esgoto: Desconto de 50% (Águas Guariroba)</option>
-                <option value="portugues">Educação e Integração: Inscrição em cursos gratuitos de Português (UEMS/UFMS)</option>
-                <option value="pf">Polícia Federal: Apresentação para coleta biométrica e expedição de DPRNM / CRNM</option>
-                <option value="dpu">DPU: Assistência jurídica federal integral para recurso ao CONARE</option>
-                <option value="banco">Abertura de Conta Bancária: Apresentação nos termos da Resolução BCB 4.753/19</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block font-semibold text-slate-700 mb-1">Acadêmico(a) Extensionista LADIR:</label>
-              <input type="text" id="gen-enc-academico" placeholder="Ex: Nome do Voluntário(a)" class="w-full p-2 border border-slate-300 rounded text-xs">
-            </div>
-
-            <div class="sm:col-span-2 lg:col-span-3">
-              <label class="block font-semibold text-slate-700 mb-1">Finalidade Específica e Informações Solicitadas:</label>
-              <textarea id="gen-enc-motivo" rows="3" placeholder="Descreva os detalhes da demanda..." class="w-full p-2 border border-slate-300 rounded text-xs"></textarea>
+        <!-- TAB: FICHA DE ENCAMINHAMENTO INTERINSTITUCIONAL (MODERNIZADA) -->
+        <div id="tab-encaminhamento" class="gen-tab-pane space-y-5">
+          
+          <!-- Aviso Institucional Destacado -->
+          <div class="p-4 rounded-xl bg-gradient-to-r from-sky-50 to-indigo-50/50 border border-sky-200/80 flex items-start space-x-3 text-xs text-slate-700">
+            <span class="text-xl">💡</span>
+            <div class="leading-relaxed">
+              <strong class="text-brand-900 block font-bold mb-0.5">Finalidade Interinstitucional:</strong> 
+              Esta ficha formaliza o encaminhamento do assistido para órgãos da rede de apoio em Campo Grande, superando barreiras linguísticas e garantindo o atendimento direto no balcão de destino.
             </div>
           </div>
 
-          <div class="flex flex-wrap gap-2 pt-1">
-            <button onclick="generateEncaminhamentoText()" class="px-4 py-2 bg-brand-800 hover:bg-brand-900 text-white font-medium text-xs rounded-lg transition shadow-sm flex items-center space-x-1.5">
-              <span>⚡</span>
-              <span>Gerar Ficha de Encaminhamento</span>
-            </button>
-            <button onclick="printEncaminhamento()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white font-medium text-xs rounded-lg transition shadow-sm flex items-center space-x-1.5">
-              <span>🖨️</span>
-              <span>Imprimir Ficha (A4)</span>
-            </button>
-          </div>
+          <!-- Card de Seleção e Preenchimento -->
+          <div class="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-4 shadow-2xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+              
+              <div class="sm:col-span-2 lg:col-span-2">
+                <label class="block font-bold text-slate-700 mb-1.5 flex items-center space-x-1">
+                  <span>🏛️</span>
+                  <span>Órgão / Instituição de Destino:</span>
+                </label>
+                <select id="gen-enc-orgao" onchange="checkCustomOrgao()" class="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-xs bg-white shadow-2xs font-medium">
+                  <option value="CRAS / SAS (Secretaria Municipal de Assistência Social)">CRAS / SAS (Inscrição / Atualização no CadÚnico & Benefícios Sociais)</option>
+                  <option value="Casa de Passagem Resgate - Unidade II (Rua Maracaju, 229 • Centro / SAS)">Casa de Passagem Resgate (Acolhimento Temporário, Pernoite & Alimentação)</option>
+                  <option value="UBS / Posto de Saúde (Secretaria Municipal de Saúde - SESAU)">UBS / Posto de Saúde (Cartão SUS, Vacinação & Consultas Médicas)</option>
+                  <option value="FUNSAT (Fundação Social do Trabalho de Campo Grande)">FUNSAT (Vagas de Emprego, Trabalho Formal & CTPS Digital)</option>
+                  <option value="Delegacia da Receita Federal em Campo Grande (DRF)">Receita Federal (Inscrição, Regularização & Emissão de CPF)</option>
+                  <option value="Delegacia de Imigração da Polícia Federal (DELEMIG/MS)">Polícia Federal - DELEMIG (Coleta Biométrica, Refúgio & CRNM)</option>
+                  <option value="Defensoria Pública da União (DPU/MS)">Defensoria Pública da União - DPU (Assistência Jurídica Federal)</option>
+                  <option value="DPE/MS • Unidade Belmar (Família, Guarda, Alimentos & Direitos Humanos - Rua Arthur Jorge, 779)">DPE/MS • Unidade Belmar (Família, Guarda de Menores & Direitos Humanos)</option>
+                  <option value="DPE/MS • Unidade Afonso Pena (Mulher Vítima de Violência & Infância e Juventude - Av. Afonso Pena, 3.850)">DPE/MS • Unidade Afonso Pena (NUDEM - Mulher & NUDECA - Infância)</option>
+                  <option value="DPE/MS • Unidade Centro (Cível, Consumidor & Fazenda Pública - Rua Antônio Maria Coelho, 1.668)">DPE/MS • Unidade Centro (Cível Geral, Registro Tardio & Consumidor)</option>
+                  <option value="DPE/MS • Unidade Barão de Melgaço (Saúde Pública & Execução Penal - Rua Barão de Melgaço, 128)">DPE/MS • Unidade Barão de Melgaço (NAS - Medicamentos/Cirurgias SUS)</option>
+                  <option value="Secretaria Municipal/Estadual de Educação (Escola)">Secretaria de Educação / Escola (Matrícula Escolar de Crianças e Jovens)</option>
+                  <option value="INSS (Instituto Nacional do Seguro Social)">INSS (Benefícios Previdenciários / BPC-LOAS)</option>
+                  <option value="Outro">Outro Órgão / Destinatário Personalizado</option>
+                </select>
+              </div>
 
-          <div class="mt-3">
-            <textarea id="gen-enc-output" rows="12" class="w-full p-3 bg-slate-900 text-slate-100 font-mono text-xs rounded-lg border border-slate-700 leading-relaxed" readonly placeholder="A Ficha de Encaminhamento gerada aparecerá aqui..."></textarea>
-            <div class="flex space-x-2 mt-2">
-              <button onclick="copyGeneratedText('gen-enc-output')" class="text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded transition">Copiar Ficha Completa</button>
+              <div id="box-enc-orgao-custom" class="hidden sm:col-span-2 lg:col-span-1">
+                <label class="block font-bold text-slate-700 mb-1.5">Especifique o Órgão de Destino:</label>
+                <input type="text" id="gen-enc-orgao-custom" placeholder="Ex: Conselho Tutelar Norte" class="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white">
+              </div>
+
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Nome Completo do Assistido:</label>
+                <input type="text" id="gen-enc-nome" placeholder="Ex: Jean Luc Pierre" class="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Nacionalidade:</label>
+                <input type="text" id="gen-enc-nacio" placeholder="Ex: Haitiana / Venezuelana" class="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Idioma Materno:</label>
+                <input type="text" id="gen-enc-idioma" placeholder="Ex: Espanhol / Crioulo Haitiano" class="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white font-semibold text-brand-900">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Documento e Número:</label>
+                <input type="text" id="gen-enc-doc" placeholder="Ex: Passaporte / DNI / Protocolo..." class="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">CPF (se houver):</label>
+                <input type="text" id="gen-enc-cpf" placeholder="000.000.000-00 ou Em emissão" class="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Telefone / WhatsApp com DDD:</label>
+                <input type="text" id="gen-enc-tel" placeholder="(67) 99999-9999" class="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white">
+              </div>
+              <div class="sm:col-span-2 lg:col-span-2">
+                <label class="block font-bold text-slate-700 mb-1.5">Endereço Residencial em Campo Grande:</label>
+                <input type="text" id="gen-enc-end" placeholder="Rua, número e bairro (ex: Rua das Palmeiras, 120, Aero Rancho)" class="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white">
+              </div>
+
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Acadêmico(a) Extensionista LADIR:</label>
+                <input type="text" id="gen-enc-academico" placeholder="Nome do Voluntário(a)" class="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white">
+              </div>
+
+              <div class="sm:col-span-2 lg:col-span-3">
+                <label class="block font-bold text-slate-700 mb-1.5">Modelo de Demanda Pré-Configurado:</label>
+                <select id="gen-enc-preset" onchange="applyPresetDemanda()" class="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white font-medium">
+                  <option value="">Selecione um modelo rápido ou escreva livremente...</option>
+                  <option value="cadunico">CadÚnico: Inclusão da família no Cadastro Único</option>
+                  <option value="abrigo_maracaju">Casa de Passagem (Rua Maracaju): Acolhimento institucional temporário</option>
+                  <option value="cedami">CEDAMI / Pastoral do Migrante: Acolhimento humanitário</option>
+                  <option value="cerma_cetrap">CERMA / CETRAP: Proteção especial contra tráfico e trabalho escravo</option>
+                  <option value="sus">SUS / Saúde: Emissão do Cartão Nacional de Saúde e atendimento</option>
+                  <option value="funsat">FUNSAT: Intermediação de vagas de emprego formal e CTPS Digital</option>
+                  <option value="escola">Educação: Matrícula compulsória e imediata de menor em idade escolar</option>
+                  <option value="transporte_cidadao">Transporte Coletivo: Emissão do Cartão Cidadão com integração</option>
+                  <option value="transporte_estudante">Transporte Coletivo: Emissão do Passe do Estudante Gratuito</option>
+                  <option value="tarifa_luz">Tarifa Social de Energia Elétrica: Desconto na conta de luz (Energisa)</option>
+                  <option value="tarifa_agua">Tarifa Social de Água e Esgoto: Desconto de 50% (Guariroba)</option>
+                  <option value="portugues">Educação e Integração: Inscrição em cursos gratuitos de Português</option>
+                  <option value="pf">Polícia Federal: Apresentação para coleta biométrica e DPRNM/CRNM</option>
+                  <option value="dpu">DPU: Assistência jurídica federal integral para recurso ao CONARE</option>
+                  <option value="banco">Abertura de Conta Bancária: Apresentação (Res. BCB 4.753/19)</option>
+                </select>
+              </div>
+
+              <div class="sm:col-span-2 lg:col-span-3">
+                <label class="block font-bold text-slate-700 mb-1.5">Finalidade Específica e Informações Solicitadas:</label>
+                <textarea id="gen-enc-motivo" rows="3" placeholder="Descreva os detalhes da demanda..." class="w-full p-3 border border-slate-300 rounded-xl text-xs bg-white leading-relaxed"></textarea>
+              </div>
+            </div>
+
+            <!-- Botões de Ação Modernos -->
+            <div class="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-200">
+              <button onclick="generateEncaminhamentoText()" class="px-5 py-2.5 bg-brand-800 hover:bg-brand-900 text-white font-bold text-xs rounded-xl transition shadow-sm flex items-center space-x-2">
+                <span>⚡</span>
+                <span>Gerar Ficha de Encaminhamento</span>
+              </button>
+              <button onclick="printEncaminhamento()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs rounded-xl transition shadow-2xs flex items-center space-x-2">
+                <span>🖨️</span>
+                <span>Imprimir Ficha (A4)</span>
+              </button>
             </div>
           </div>
+
+          <!-- Painel de Saída Estilizado (Preview) -->
+          <div class="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden shadow-lg">
+            <div class="bg-slate-800/80 px-4 py-2.5 border-b border-slate-700 flex items-center justify-between text-xs text-slate-300">
+              <span class="font-bold flex items-center space-x-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Pré-visualização do Documento Gerado</span>
+              </span>
+              <button onclick="copyGeneratedText('gen-enc-output')" class="hover:text-white font-semibold flex items-center space-x-1 bg-slate-700/60 hover:bg-slate-700 px-2.5 py-1 rounded-lg transition">
+                <span>📋</span>
+                <span>Copiar Texto</span>
+              </button>
+            </div>
+            <div class="p-4">
+              <textarea id="gen-enc-output" rows="12" class="w-full p-3 bg-transparent text-slate-100 font-mono text-xs leading-relaxed outline-none resize-y custom-scrollbar" readonly placeholder="A Ficha de Encaminhamento gerada aparecerá aqui após clicar em 'Gerar Ficha'..."></textarea>
+            </div>
+          </div>
+
         </div>
-
+        
         <!-- TAB: NOTIFICAÇÃO EXTRAJUDICIAL -->
         <div id="tab-notificacao" class="gen-tab-pane hidden space-y-4">
           <div class="p-3.5 rounded-lg bg-red-50/80 border border-red-200 text-xs text-red-950 leading-relaxed">
