@@ -3419,7 +3419,7 @@ function doGet(e) {
 
   <!-- Scripts finais -->
   <script>
-    // Navigation tab switching & scroll
+   // Navegação por abas estritas na barra lateral
     const navButtons = document.querySelectorAll('.nav-btn');
     const sections = document.querySelectorAll('.content-section');
 
@@ -3429,6 +3429,7 @@ function doGet(e) {
       if (!targetId) return;
       currentActiveTabId = targetId;
 
+      // Atualiza os botões ativos na barra lateral
       navButtons.forEach(btn => {
         if (btn.dataset.target === targetId) {
           btn.classList.add('active-nav');
@@ -3436,6 +3437,26 @@ function doGet(e) {
           btn.classList.remove('active-nav');
         }
       });
+
+      // Mostra EXCLUSIVAMENTE a seção correspondente e oculta as demais
+      sections.forEach(s => {
+        if (s.id === targetId) {
+          s.classList.remove('hidden');
+        } else {
+          s.classList.add('hidden');
+        }
+      });
+
+      // Rola a página suavemente para o topo
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.target;
+        setActiveSection(target);
+      });
+    });
 
       sections.forEach(s => {
         if (s.id === targetId) {
@@ -4988,7 +5009,7 @@ ${textoVias}`;
     }
 
     // Inicialização ao carregar a página
-    window.addEventListener('DOMContentLoaded', () => {
+   window.addEventListener('DOMContentLoaded', () => {
       inicializarProtocoloFicha();
       renderizarListaBanco();
       setActiveSection('sec-simulador');
