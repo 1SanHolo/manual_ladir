@@ -485,6 +485,8 @@
               <span>⚡</span>
               <span>Usar Dados nos Geradores</span>
             </button>
+            <button onclick="imprimirFichaAtendimento()" class="px-3 py-1.5 bg-brand-800 hover:bg-brand-900 text-white text-xs font-semibold rounded-lg transition shadow-2xs flex items-center space-x-1.5">
+              <span>🖨️</span>
               <span>Imprimir Ficha (A4)</span>
             </button>
             <button onclick="limparFichaAtendimento()" class="px-3 py-1.5 bg-white hover:bg-red-50 text-red-600 text-xs font-semibold rounded-lg border border-red-200 transition shadow-2xs flex items-center space-x-1.5">
@@ -4626,7 +4628,7 @@ ${textoVias}`;
       setVal('fa-data-ingresso', registro.dataIngresso);
       setVal('fa-local-ingresso', registro.localIngresso);
       setVal('fa-via-ingresso', registro.viaIngresso);
-      setVal('condicao-ingresso', registro.condicaoIngresso);
+      setVal('fa-condicao-ingresso', registro.condicaoIngresso);
       setVal('fa-relato-fatos', registro.relatoFatos);
       setVal('fa-via-recomendada', registro.viaRecomendada);
       setVal('fa-fundamentacao-legal', registro.fundamentacaoLegal);
@@ -5217,7 +5219,7 @@ LADIR • Faculdade de Direito • FADIR / UFMS`;
         window.print();
       }, 400);
     };
-  </script>
+  <\/script>
 </body>
 </html>`);
       printWindow.document.close();
