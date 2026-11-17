@@ -3425,6 +3425,12 @@ function doGet(e) {
 
     let currentActiveTabId = 'sec-simulador';
 
+    // Navegação por abas estritas na barra lateral
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const sections = document.querySelectorAll('.content-section');
+
+    let currentActiveTabId = 'sec-simulador';
+
     function setActiveSection(targetId) {
       if (!targetId) return;
       currentActiveTabId = targetId;
