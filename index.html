@@ -3369,7 +3369,7 @@ function doGet(e) {
     <!-- Cabeçalho Institucional -->
     <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #0f2038; padding-bottom: 12px; margin-bottom: 16px;">
       <div style="display: flex; align-items: center; gap: 12px;">
-        <img src="LADIR-logo.jpg" alt="Logo LADIR" style="width: 48px; height: 48px; object-fit: contain; border-radius: 8px; border: 1px solid #dce5f2; padding: 3px;">
+       <img src="LADIR-logo.jpg" alt="Logo LADIR" onerror="this.onerror=null; this.src='images.jfif';" style="width: 48px; height: 48px; object-fit: contain; border-radius: 8px; border: 1px solid #dce5f2; padding: 3px;">
         <div>
           <p style="font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #2b5288; margin: 0;">Universidade Federal de Mato Grosso do Sul • FADIR</p>
           <h2 style="font-size: 12.5pt; font-weight: 800; color: #0f2038; margin: 2px 0;">LADIR — Liga Acadêmica de Direito Internacional e Refugiados</h2>
@@ -5143,6 +5143,8 @@ LADIR • Faculdade de Direito • FADIR / UFMS`;
       if (!text || text.trim() === '') {
         generateEncaminhamentoText();
       }
+      imprimirDocumentoGerado('gen-enc-output', 'FICHA DE ENCAMINHAMENTO INTERINSTITUCIONAL');
+    }
       const printText = document.getElementById('gen-enc-output')?.value || '';
 
       const agora = new Date();
@@ -5644,9 +5646,14 @@ LADIR • Faculdade de Direito • FADIR / UFMS`;
         return;
       }
       const tituloEl = document.getElementById('print-doc-titulo');
-      const corpoEl = document.getElementById('print-doc-corpo');
-      if (tituloEl) tituloEl.textContent = tituloDoc;
-      if (corpoEl) corpoEl.textContent = el.value;
+    const corpoEl = document.getElementById('print-doc-corpo');
+    const dataEl = document.getElementById('print-doc-data-emissao');
+    if (tituloEl) tituloEl.textContent = tituloDoc;
+    if (corpoEl) corpoEl.textContent = el.value;
+    if (dataEl) {
+      const agora = new Date();
+      dataEl.textContent = 'Emitido em ' + agora.toLocaleDateString('pt-BR') + ' às ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
 
       document.body.classList.add('imprimindo-documento-ladir');
       window.print();
