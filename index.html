@@ -7219,12 +7219,6 @@ LADIR • Faculdade de Direito • FADIR / UFMS`;
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
 
-    if (!email.endsWith('@ufms.br')) {
-      errorEl.textContent = 'Acesso restrito: utilize seu e-mail institucional (@ufms.br).';
-      errorEl.classList.remove('hidden');
-      return;
-    }
-
     btn.disabled = true;
     btn.textContent = 'Autenticando...';
 
