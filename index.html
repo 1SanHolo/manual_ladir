@@ -5421,169 +5421,431 @@ ${textoVias}`;
       showToast('Síntese do relatório copiada com sucesso!');
     }
 
-    function renderizarListaBanco(filtro = '') {
-      const container = document.getElementById('lista-atendimentos-banco');
-      if (!container) return;
-      const lista = obterAtendimentosDoStorage();
-      const termo = filtro.toLowerCase().trim();
+   /* =====================================================================
+   LADIR • Banco de Atendimentos sincronizado com o Supabase
+   Tabela: atendimentos_ladir  (mesmo formato usado por salvarFichaNuvem)
+   Cache/fallback: localStorage 'ladir_banco_atendimentos'
+   ===================================================================== */
 
-      const filtrados = lista.filter(item => {
-        if (!termo) return true;
-        const nome = (item.nome || '').toLowerCase();
-        const cpf = (item.cpf || '').toLowerCase();
-        const protocolo = (item.protocolo || '').toLowerCase();
-        const nacionalidade = (item.nacionalidade || '').toLowerCase();
-        return nome.includes(termo) || cpf.includes(termo) || protocolo.includes(termo) || nacionalidade.includes(termo);
-      });
+// ---------- Chaves e estado ----------
+const CHAVE_BANCO_LOCAL = 'ladir_banco_atendimentos';
+const CHAVE_PENDENTES_NUVEM = 'ladir_supabase_pendentes';   // protocolos ainda não enviados / alterados offline
+const CHAVE_CONHECIDOS_NUVEM = 'ladir_supabase_conhecidos'; // protocolos já vistos na nuvem (detecta exclusões feitas em outro PC)
+let estadoNuvemBanco = 'desconhecido';                      // 'ok' | 'login' | 'offline'
+let sincronizandoBanco = false;
 
-      if (filtrados.length === 0) {
-        container.innerHTML = `
-          <div class="p-4 text-center text-xs text-slate-500 bg-white rounded-lg border border-slate-200">
-            Nenhum atendimento registrado no banco até o momento${termo ? ' para os termos pesquisados' : ''}.
-          </div>
-        `;
-        return;
+// ---------- Auxiliares: listas de protocolos no localStorage ----------
+function lerListaProtocolos(chave) {
+  try { const v = JSON.parse(localStorage.getItem(chave) || '[]'); return Array.isArray(v) ? v : []; }
+  catch (e) { return []; }
+}
+function gravarListaProtocolos(chave, lista) {
+  try { localStorage.setItem(chave, JSON.stringify([...new Set(lista)])); } catch (e) { console.error(e); }
+}
+function marcarPendenteNuvem(protocolo) {
+  const p = lerListaProtocolos(CHAVE_PENDENTES_NUVEM);
+  if (!p.includes(protocolo)) { p.push(protocolo); gravarListaProtocolos(CHAVE_PENDENTES_NUVEM, p); }
+}
+function desmarcarPendenteNuvem(protocolo) {
+  gravarListaProtocolos(CHAVE_PENDENTES_NUVEM, lerListaProtocolos(CHAVE_PENDENTES_NUVEM).filter(x => x !== protocolo));
+}
+
+// ---------- Auxiliares: Supabase ----------
+// getSession lê a sessão salva no navegador (não depende de internet).
+async function obterUsuarioSupabase() {
+  try {
+    const { data, error } = await ladirSupabase.auth.getSession();
+    if (error || !data || !data.session) return null;
+    return data.session.user || null;
+  } catch (e) { return null; }
+}
+
+function registroParaLinhaSupabase(r, userId) {
+  return {
+    protocolo: r.protocolo,
+    assistido_nome: r.nome,
+    assistido_cpf: r.cpf,
+    assistido_rg: r.docOrigem || '',
+    assistido_endereco: r.endereco || '',
+    assistido_telefone: r.telefone || '',
+    assistido_renda_familiar: parseFloat(r.rendaTotal) || 0,
+    via_selecionada: r.viaRecomendada || null,
+    diagnostico_resumo: r.parecerResumo || '',
+    dados_completos: r,
+    consentimento_assistido: true,
+    criado_por: userId,
+    atualizado_em: new Date().toISOString()
+  };
+}
+
+function linhaSupabaseParaRegistro(row) {
+  const d = (row.dados_completos && typeof row.dados_completos === 'object') ? row.dados_completos : {};
+  return {
+    ...d,
+    protocolo: row.protocolo,
+    nome: d.nome || row.assistido_nome || '',
+    cpf: d.cpf || row.assistido_cpf || '',
+    viaRecomendada: d.viaRecomendada || row.via_selecionada || '',
+    timestamp: d.timestamp || Date.parse(row.atualizado_em) || Date.now()
+  };
+}
+
+// Envia UM registro à nuvem. Retorna { ok, motivo } onde motivo = 'login' | 'lgpd' | 'rede'
+async function enviarRegistroParaNuvem(registro) {
+  const user = await obterUsuarioSupabase();
+  if (!user) return { ok: false, motivo: 'login' };
+  if (!registro.aceiteTermo) return { ok: false, motivo: 'lgpd' }; // mesma regra do salvarFichaNuvem
+
+  try {
+    const { data, error } = await ladirSupabase
+      .from('atendimentos_ladir')
+      .upsert(registroParaLinhaSupabase(registro, user.id), { onConflict: 'protocolo' })
+      .select('id')
+      .single();
+    if (error) throw error;
+
+    desmarcarPendenteNuvem(registro.protocolo);
+    try {
+      if (typeof window.registrarAuditoriaLGPD === 'function') {
+        await window.registrarAuditoriaLGPD('SALVAR_FICHA', data && data.id, `Protocolo ${registro.protocolo} salvo por ${user.email}`);
       }
+    } catch (e) { console.warn('Auditoria LGPD não registrada:', e); }
+    return { ok: true };
+  } catch (err) {
+    console.error('Erro ao enviar para o Supabase:', err);
+    return { ok: false, motivo: 'rede', erro: err };
+  }
+}
 
-      container.innerHTML = filtrados.map(item => `
-        <div class="p-3 bg-white hover:bg-slate-50 rounded-lg border border-slate-200 transition flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
-          <div class="text-xs">
-            <div class="flex items-center space-x-2">
-              <span class="font-mono font-bold text-brand-900">${item.protocolo}</span>
-              <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">${item.dataHora || 'Data não registrada'}</span>
-              <span class="text-[10px] bg-sky-100 text-brand-900 px-1.5 py-0.5 rounded font-semibold">${item.nacionalidade || 'Nacionalidade não informada'}</span>
-              ${badgeSyncItem(item)}
-            </div>
-            <div class="font-bold text-slate-900 text-sm mt-0.5">${item.nome || 'Sem Nome'}</div>
-            <div class="text-slate-500 text-[11px]">
-              CPF: <span class="text-slate-700">${item.cpf || 'Não informado'}</span> | 
-              Via: <span class="text-brand-800 font-medium">${item.viaRecomendada || 'Em análise'}</span>
-            </div>
-          </div>
-          <div class="flex items-center space-x-2 shrink-0">
-            <button onclick="abrirNaAbaCasos('${item.protocolo}')" class="px-2.5 py-1 bg-white hover:bg-sky-50 text-brand-800 border border-sky-300 rounded text-[11px] font-bold transition flex items-center space-x-1">
-              <span>📂</span>
-              <span>Acompanhar</span>
-            </button>
-            <button onclick="carregarAtendimentoParaFicha('${item.protocolo}')" class="px-2.5 py-1 bg-brand-800 hover:bg-brand-900 text-white rounded text-[11px] font-bold transition flex items-center space-x-1 shadow-2xs">
-              <span>📥</span>
-              <span>Carregar na Ficha</span>
-            </button>
-            <button onclick="excluirAtendimentoDoBanco('${item.protocolo}')" title="Excluir este registro" class="p-1 text-slate-400 hover:text-red-600 transition rounded hover:bg-red-50 text-xs">
-              🗑️
-            </button>
-          </div>
+// Envia à nuvem tudo que ficou pendente (salvo offline / sem login / legado do localStorage)
+async function sincronizarPendentesNuvem() {
+  const pendentes = lerListaProtocolos(CHAVE_PENDENTES_NUVEM);
+  if (!pendentes.length) return [];
+  const locais = obterAtendimentosDoStorage();
+  const enviados = [];
+  for (const protocolo of pendentes) {
+    const reg = locais.find(i => i.protocolo === protocolo);
+    if (!reg) { desmarcarPendenteNuvem(protocolo); continue; }
+    const r = await enviarRegistroParaNuvem(reg);
+    if (r.ok) enviados.push(protocolo);
+    else if (r.motivo !== 'lgpd') break; // sem login/rede: para e tenta de novo depois
+  }
+  return enviados;
+}
+
+// Baixa a lista da nuvem, mescla com o que está pendente localmente e regrava o cache.
+async function atualizarCacheDaNuvem() {
+  const user = await obterUsuarioSupabase();
+  if (!user) { estadoNuvemBanco = 'login'; return false; }
+
+  try {
+    const { data, error } = await ladirSupabase
+      .from('atendimentos_ladir')
+      .select('protocolo, assistido_nome, assistido_cpf, via_selecionada, dados_completos, atualizado_em')
+      .order('atualizado_em', { ascending: false });
+    if (error) throw error;
+
+    const daNuvem = (data || []).map(linhaSupabaseParaRegistro);
+    const nuvemSet = new Set(daNuvem.map(r => r.protocolo));
+    const conhecidos = new Set(lerListaProtocolos(CHAVE_CONHECIDOS_NUVEM));
+    const locais = obterAtendimentosDoStorage();
+
+    // Registro local que nunca esteve na nuvem (dados antigos do localStorage, backup importado...) => enviar.
+    // Registro local que JÁ esteve na nuvem e sumiu => foi excluído em outro computador => descartar.
+    locais.forEach(r => {
+      if (!nuvemSet.has(r.protocolo) && !conhecidos.has(r.protocolo)) marcarPendenteNuvem(r.protocolo);
+    });
+
+    const pendentesAntes = new Set(lerListaProtocolos(CHAVE_PENDENTES_NUVEM));
+    const enviados = await sincronizarPendentesNuvem();
+
+    // Versão local vence quando há alteração pendente; no resto, vale a nuvem.
+    const locaisPendentes = locais.filter(r => pendentesAntes.has(r.protocolo));
+    const pendSet = new Set(locaisPendentes.map(r => r.protocolo));
+    const mesclado = [...locaisPendentes, ...daNuvem.filter(r => !pendSet.has(r.protocolo))]
+      .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+    localStorage.setItem(CHAVE_BANCO_LOCAL, JSON.stringify(mesclado));
+    gravarListaProtocolos(CHAVE_CONHECIDOS_NUVEM, [...nuvemSet, ...enviados]);
+    estadoNuvemBanco = 'ok';
+    return true;
+  } catch (err) {
+    console.error('Sem conexão com o Supabase, usando dados locais:', err);
+    estadoNuvemBanco = 'offline';
+    return false;
+  }
+}
+
+// ---------- Desenho da lista (usa apenas o cache local; não acessa a rede) ----------
+function desenharListaBanco(filtro = '') {
+  const container = document.getElementById('lista-atendimentos-banco');
+  if (!container) return;
+  const lista = obterAtendimentosDoStorage();
+  const termo = String(filtro || '').toLowerCase().trim();
+  const pendentes = new Set(lerListaProtocolos(CHAVE_PENDENTES_NUVEM));
+
+  const filtrados = lista.filter(item => {
+    if (!termo) return true;
+    return (item.nome || '').toLowerCase().includes(termo)
+      || (item.cpf || '').toLowerCase().includes(termo)
+      || (item.protocolo || '').toLowerCase().includes(termo)
+      || (item.nacionalidade || '').toLowerCase().includes(termo);
+  });
+
+  const avisos = {
+    ok: '<div class="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1.5">☁️ Sincronizado com a nuvem (Supabase).</div>',
+    login: '<div class="text-[11px] text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5">🔒 Faça login para sincronizar. Exibindo apenas os registros deste computador.</div>',
+    offline: '<div class="text-[11px] text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5">📴 Sem conexão com a nuvem. Exibindo os registros salvos neste computador.</div>',
+    desconhecido: ''
+  };
+  const aviso = avisos[estadoNuvemBanco] || '';
+
+  if (filtrados.length === 0) {
+    container.innerHTML = aviso + `
+      <div class="p-4 text-center text-xs text-slate-500 bg-white rounded-lg border border-slate-200">
+        Nenhum atendimento registrado no banco até o momento${termo ? ' para os termos pesquisados' : ''}.
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = aviso + filtrados.map(item => `
+    <div class="p-3 bg-white hover:bg-slate-50 rounded-lg border border-slate-200 transition flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
+      <div class="text-xs">
+        <div class="flex items-center space-x-2">
+          <span class="font-mono font-bold text-brand-900">${escHtml(item.protocolo)}</span>
+          <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">${escHtml(item.dataHora || 'Data não registrada')}</span>
+          <span class="text-[10px] bg-sky-100 text-brand-900 px-1.5 py-0.5 rounded font-semibold">${escHtml(item.nacionalidade || 'Nacionalidade não informada')}</span>
+          ${badgeSyncItem(item)}
+          ${pendentes.has(item.protocolo) ? '<span class="text-[10px] bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded font-semibold" title="Ainda não enviado ao Supabase">📴 Só neste computador</span>' : ''}
         </div>
-      `).join('');
+        <div class="font-bold text-slate-900 text-sm mt-0.5">${escHtml(item.nome || 'Sem Nome')}</div>
+        <div class="text-slate-500 text-[11px]">
+          CPF: <span class="text-slate-700">${escHtml(item.cpf || 'Não informado')}</span> |
+          Via: <span class="text-brand-800 font-medium">${escHtml(item.viaRecomendada || 'Em análise')}</span>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2 shrink-0">
+        <button onclick="abrirNaAbaCasos(${jsArg(item.protocolo)})" class="px-2.5 py-1 bg-white hover:bg-sky-50 text-brand-800 border border-sky-300 rounded text-[11px] font-bold transition flex items-center space-x-1">
+          <span>📂</span><span>Acompanhar</span>
+        </button>
+        <button onclick="carregarAtendimentoParaFicha(${jsArg(item.protocolo)})" class="px-2.5 py-1 bg-brand-800 hover:bg-brand-900 text-white rounded text-[11px] font-bold transition flex items-center space-x-1 shadow-2xs">
+          <span>📥</span><span>Carregar na Ficha</span>
+        </button>
+        <button onclick="excluirAtendimentoDoBanco(${jsArg(item.protocolo)})" title="Excluir este registro" class="p-1 text-slate-400 hover:text-red-600 transition rounded hover:bg-red-50 text-xs">
+          🗑️
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ---------- 1) LISTAGEM (substitui renderizarListaBanco) ----------
+// Mostra o cache na hora e depois atualiza com os dados da nuvem.
+async function renderizarListaBanco(filtro = '') {
+  const container = document.getElementById('lista-atendimentos-banco');
+  if (!container) return;
+
+  desenharListaBanco(filtro);
+  if (sincronizandoBanco) return;
+
+  sincronizandoBanco = true;
+  try {
+    await atualizarCacheDaNuvem();
+  } finally {
+    sincronizandoBanco = false;
+  }
+  const input = document.getElementById('busca-banco-input');
+  desenharListaBanco(input ? input.value : filtro);
+  atualizarContadorBanco();
+}
+
+// Digitar na busca só filtra o que já está carregado (sem nova consulta à rede).
+function filtrarAtendimentosBanco() {
+  const input = document.getElementById('busca-banco-input');
+  desenharListaBanco(input ? input.value : '');
+}
+
+// ---------- 2) SALVAR (substitui salvarAtendimentoNoBanco) ----------
+async function salvarAtendimentoNoBanco() {
+  const nomeInput = document.getElementById('fa-nome');
+  const nome = nomeInput ? nomeInput.value.trim() : '';
+
+  if (!nome) {
+    showToast('Informe ao menos o Nome do Assistido antes de salvar!');
+    if (nomeInput) nomeInput.focus();
+    return;
+  }
+
+  const protEl = document.getElementById('ficha-protocolo-num');
+  const protocolo = protEl ? protEl.textContent.trim() : gerarNumeroProtocolo();
+
+  const registro = {
+    protocolo: protocolo,
+    dataHora: new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+    timestamp: Date.now(),
+    nome: nome,
+    nomeSocial: document.getElementById('fa-nome-social')?.value.trim() || '',
+    paisOrigem: document.getElementById('fa-pais-origem')?.value.trim() || '',
+    nacionalidade: document.getElementById('fa-nacionalidade')?.value.trim() || '',
+    dataNasc: document.getElementById('fa-data-nasc')?.value || '',
+    genero: document.getElementById('fa-genero')?.value || '',
+    estadoCivil: document.getElementById('fa-estado-civil')?.value || '',
+    idioma: document.getElementById('fa-idioma')?.value.trim() || '',
+    nivelPortugues: document.getElementById('fa-nivel-portugues')?.value || '',
+    docOrigem: document.getElementById('fa-doc-origem')?.value.trim() || '',
+    cpf: document.getElementById('fa-cpf')?.value.trim() || '',
+    rnmProtocolo: document.getElementById('fa-rnm-protocolo')?.value.trim() || '',
+    telefone: document.getElementById('fa-telefone')?.value.trim() || '',
+    email: document.getElementById('fa-email')?.value.trim() || '',
+    tempoBrasil: document.getElementById('fa-tempo-brasil')?.value.trim() || '',
+    filhoBrasileiro: document.getElementById('fa-filho-brasileiro')?.value || 'Não',
+    dependentesQtd: document.getElementById('fa-dependentes-qtd')?.value || '0',
+    tipoMoradia: document.getElementById('fa-tipo-moradia')?.value || '',
+    endereco: document.getElementById('fa-endereco')?.value.trim() || '',
+    cep: document.getElementById('fa-cep')?.value.trim() || '',
+    situacaoTrabalho: document.getElementById('fa-situacao-trabalho')?.value || '',
+    profissaoOrigem: document.getElementById('fa-profissao-origem')?.value.trim() || '',
+    rendaTotal: document.getElementById('fa-renda-total')?.value || '',
+    obsSocio: document.getElementById('fa-obs-socio')?.value.trim() || '',
+    beneficios: {
+      cadunico: !!document.getElementById('fa-ben-cadunico')?.checked,
+      bolsafamilia: !!document.getElementById('fa-ben-bolsafamilia')?.checked,
+      sus: !!document.getElementById('fa-ben-sus')?.checked,
+      banco: !!document.getElementById('fa-ben-banco')?.checked,
+      onibus: !!document.getElementById('fa-ben-onibus')?.checked,
+      ctps: !!document.getElementById('fa-ben-ctps')?.checked
+    },
+    vulnerabilidades: {
+      mulherRisco: !!document.getElementById('fa-vuln-mulher')?.checked,
+      gestante: !!document.getElementById('fa-vuln-gestante')?.checked,
+      filhoEscola: !!document.getElementById('fa-vuln-escola')?.checked,
+      idosoPcd: !!document.getElementById('fa-vuln-idoso')?.checked,
+      barreiraIdioma: !!document.getElementById('fa-vuln-idioma')?.checked,
+      traficoTrabalhoEscravo: !!document.getElementById('fa-vuln-trafico')?.checked
+    },
+    dataIngresso: document.getElementById('fa-data-ingresso')?.value || '',
+    localIngresso: document.getElementById('fa-local-ingresso')?.value.trim() || '',
+    viaIngresso: document.getElementById('fa-via-ingresso')?.value || '',
+    condicaoIngresso: document.getElementById('fa-condicao-ingresso')?.value || '',
+    motivoSaida: document.querySelector('input[name="fa-motivo-saida"]:checked')?.value || '',
+    pretendeViagem: document.querySelector('input[name="fa-pretende-viagem"]:checked')?.value || '',
+    relatoFatos: document.getElementById('fa-relato-fatos')?.value.trim() || '',
+    viaRecomendada: document.getElementById('fa-via-recomendada')?.value || '',
+    fundamentacaoLegal: document.getElementById('fa-fundamentacao-legal')?.value.trim() || '',
+    parecerResumo: document.getElementById('fa-parecer-resumo')?.value.trim() || '',
+    providencias: {
+      cpf: !!document.getElementById('fa-prov-cpf')?.checked,
+      sisconare: !!document.getElementById('fa-prov-sisconare')?.checked,
+      pf: !!document.getElementById('fa-prov-pf')?.checked,
+      encaminhamento: !!document.getElementById('fa-prov-encaminhamento')?.checked,
+      declaracoes: !!document.getElementById('fa-prov-declaracoes')?.checked,
+      orientacao: !!document.getElementById('fa-prov-orientacao')?.checked
+    },
+    proximosPassos: document.getElementById('fa-proximos-passos')?.value.trim() || '',
+    pendencias: document.getElementById('fa-pendencias')?.value.trim() || '',
+    aceiteTermo: !!document.getElementById('fa-aceite-termo')?.checked,
+    academicoNome: document.getElementById('fa-academico-nome')?.value.trim() || '',
+    academicoRga: document.getElementById('fa-academico-rga')?.value.trim() || '',
+    orientadorNome: document.getElementById('fa-orientador-nome')?.value.trim() || 'Coordenação LADIR • FADIR / UFMS'
+  };
+
+  // 1º) Grava no cache local ANTES de qualquer espera (garante que nada se perde e que
+  //     os wrappers que rodam logo após esta função já enxergam o registro).
+  try {
+    const lista = obterAtendimentosDoStorage();
+    const idx = lista.findIndex(i => i.protocolo === protocolo);
+    if (idx >= 0) lista[idx] = registro; else lista.unshift(registro);
+    localStorage.setItem(CHAVE_BANCO_LOCAL, JSON.stringify(lista));
+    marcarPendenteNuvem(protocolo);
+    atualizarContadorBanco();
+    desenharListaBanco(document.getElementById('busca-banco-input')?.value || '');
+  } catch (err) {
+    console.error('Erro ao salvar no armazenamento local:', err);
+    showToast('Erro ao salvar no armazenamento local do navegador.');
+    return;
+  }
+
+  // 2º) Envia ao Supabase (upsert por protocolo). Se falhar, fica pendente e sincroniza depois.
+  const r = await enviarRegistroParaNuvem(registro);
+  if (r.ok) {
+    estadoNuvemBanco = 'ok';
+    showToast(`☁️ Atendimento [${protocolo}] salvo na nuvem (Supabase)!`);
+  } else if (r.motivo === 'login') {
+    estadoNuvemBanco = 'login';
+    showToast(`Atendimento [${protocolo}] salvo só neste computador. Faça login para enviar à nuvem.`);
+  } else if (r.motivo === 'lgpd') {
+    showToast(`Salvo só neste computador: marque o aceite do Termo/LGPD para enviar [${protocolo}] à nuvem.`);
+  } else {
+    estadoNuvemBanco = 'offline';
+    showToast(`Sem conexão: [${protocolo}] salvo neste computador e será enviado quando a internet voltar.`);
+  }
+  atualizarContadorBanco();
+  desenharListaBanco(document.getElementById('busca-banco-input')?.value || '');
+}
+
+// ---------- 3) EXCLUIR (substitui excluirAtendimentoDoBanco) ----------
+// Necessária: sem apagar na nuvem, o registro "voltaria" na próxima atualização da lista.
+async function excluirAtendimentoDoBanco(protocolo) {
+  const lista = obterAtendimentosDoStorage();
+  const registro = lista.find(i => i.protocolo === protocolo);
+  const nome = registro ? registro.nome : protocolo;
+  const soLocal = lerListaProtocolos(CHAVE_PENDENTES_NUVEM).includes(protocolo) &&
+                  !lerListaProtocolos(CHAVE_CONHECIDOS_NUVEM).includes(protocolo);
+
+  if (!soLocal) {
+    const user = await obterUsuarioSupabase();
+    if (!user) {
+      showToast('Faça login (com internet) para excluir registros que estão na nuvem.');
+      return;
     }
-
-    function filtrarAtendimentosBanco() {
-      const input = document.getElementById('busca-banco-input');
-      renderizarListaBanco(input ? input.value : '');
-    }
-
-    function salvarAtendimentoNoBanco() {
-      const nomeInput = document.getElementById('fa-nome');
-      const nome = nomeInput ? nomeInput.value.trim() : '';
-
-      if (!nome) {
-        showToast('Informe ao menos o Nome do Assistido antes de salvar!');
-        if (nomeInput) nomeInput.focus();
+    try {
+      const { data, error } = await ladirSupabase
+        .from('atendimentos_ladir').delete().eq('protocolo', protocolo).select('id');
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        showToast('A nuvem não excluiu o registro (sem permissão ou já removido). Atualize a lista.');
         return;
       }
-
-      const protEl = document.getElementById('ficha-protocolo-num');
-      const protocolo = protEl ? protEl.textContent.trim() : gerarNumeroProtocolo();
-
-      const registro = {
-        protocolo: protocolo,
-        dataHora: new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-        timestamp: Date.now(),
-        nome: nome,
-        nomeSocial: document.getElementById('fa-nome-social')?.value.trim() || '',
-        paisOrigem: document.getElementById('fa-pais-origem')?.value.trim() || '',
-        nacionalidade: document.getElementById('fa-nacionalidade')?.value.trim() || '',
-        dataNasc: document.getElementById('fa-data-nasc')?.value || '',
-        genero: document.getElementById('fa-genero')?.value || '',
-        estadoCivil: document.getElementById('fa-estado-civil')?.value || '',
-        idioma: document.getElementById('fa-idioma')?.value.trim() || '',
-        nivelPortugues: document.getElementById('fa-nivel-portugues')?.value || '',
-        docOrigem: document.getElementById('fa-doc-origem')?.value.trim() || '',
-        cpf: document.getElementById('fa-cpf')?.value.trim() || '',
-        rnmProtocolo: document.getElementById('fa-rnm-protocolo')?.value.trim() || '',
-        telefone: document.getElementById('fa-telefone')?.value.trim() || '',
-        email: document.getElementById('fa-email')?.value.trim() || '',
-        tempoBrasil: document.getElementById('fa-tempo-brasil')?.value.trim() || '',
-        filhoBrasileiro: document.getElementById('fa-filho-brasileiro')?.value || 'Não',
-        dependentesQtd: document.getElementById('fa-dependentes-qtd')?.value || '0',
-        tipoMoradia: document.getElementById('fa-tipo-moradia')?.value || '',
-        endereco: document.getElementById('fa-endereco')?.value.trim() || '',
-        cep: document.getElementById('fa-cep')?.value.trim() || '',
-        situacaoTrabalho: document.getElementById('fa-situacao-trabalho')?.value || '',
-        profissaoOrigem: document.getElementById('fa-profissao-origem')?.value.trim() || '',
-        rendaTotal: document.getElementById('fa-renda-total')?.value || '',
-        obsSocio: document.getElementById('fa-obs-socio')?.value.trim() || '',
-        beneficios: {
-          cadunico: !!document.getElementById('fa-ben-cadunico')?.checked,
-          bolsafamilia: !!document.getElementById('fa-ben-bolsafamilia')?.checked,
-          sus: !!document.getElementById('fa-ben-sus')?.checked,
-          banco: !!document.getElementById('fa-ben-banco')?.checked,
-          onibus: !!document.getElementById('fa-ben-onibus')?.checked,
-          ctps: !!document.getElementById('fa-ben-ctps')?.checked
-        },
-        vulnerabilidades: {
-          mulherRisco: !!document.getElementById('fa-vuln-mulher')?.checked,
-          gestante: !!document.getElementById('fa-vuln-gestante')?.checked,
-          filhoEscola: !!document.getElementById('fa-vuln-escola')?.checked,
-          idosoPcd: !!document.getElementById('fa-vuln-idoso')?.checked,
-          barreiraIdioma: !!document.getElementById('fa-vuln-idioma')?.checked,
-          traficoTrabalhoEscravo: !!document.getElementById('fa-vuln-trafico')?.checked
-        },
-        dataIngresso: document.getElementById('fa-data-ingresso')?.value || '',
-        localIngresso: document.getElementById('fa-local-ingresso')?.value.trim() || '',
-        viaIngresso: document.getElementById('fa-via-ingresso')?.value || '',
-        condicaoIngresso: document.getElementById('fa-condicao-ingresso')?.value || '',
-        motivoSaida: document.querySelector('input[name="fa-motivo-saida"]:checked')?.value || '',
-        pretendeViagem: document.querySelector('input[name="fa-pretende-viagem"]:checked')?.value || '',
-        relatoFatos: document.getElementById('fa-relato-fatos')?.value.trim() || '',
-        viaRecomendada: document.getElementById('fa-via-recomendada')?.value || '',
-        fundamentacaoLegal: document.getElementById('fa-fundamentacao-legal')?.value.trim() || '',
-        parecerResumo: document.getElementById('fa-parecer-resumo')?.value.trim() || '',
-        providencias: {
-          cpf: !!document.getElementById('fa-prov-cpf')?.checked,
-          sisconare: !!document.getElementById('fa-prov-sisconare')?.checked,
-          pf: !!document.getElementById('fa-prov-pf')?.checked,
-          encaminhamento: !!document.getElementById('fa-prov-encaminhamento')?.checked,
-          declaracoes: !!document.getElementById('fa-prov-declaracoes')?.checked,
-          orientacao: !!document.getElementById('fa-prov-orientacao')?.checked
-        },
-        proximosPassos: document.getElementById('fa-proximos-passos')?.value.trim() || '',
-        pendencias: document.getElementById('fa-pendencias')?.value.trim() || '',
-        aceiteTermo: !!document.getElementById('fa-aceite-termo')?.checked,
-        academicoNome: document.getElementById('fa-academico-nome')?.value.trim() || '',
-        academicoRga: document.getElementById('fa-academico-rga')?.value.trim() || '',
-        orientadorNome: document.getElementById('fa-orientador-nome')?.value.trim() || 'Coordenação LADIR • FADIR / UFMS'
-      };
-
       try {
-        let lista = obterAtendimentosDoStorage();
-        const indexExistente = lista.findIndex(i => i.protocolo === protocolo);
-
-        if (indexExistente >= 0) {
-          lista[indexExistente] = registro;
-        } else {
-          lista.unshift(registro);
+        if (typeof window.registrarAuditoriaLGPD === 'function') {
+          await window.registrarAuditoriaLGPD('EXCLUIR_FICHA', data[0].id, `Protocolo ${protocolo} excluído por ${user.email}`);
         }
-
-        localStorage.setItem('ladir_banco_atendimentos', JSON.stringify(lista));
-        atualizarContadorBanco();
-        renderizarListaBanco();
-        showToast(`Atendimento [${protocolo}] registrado com sucesso no banco!`);
-      } catch (err) {
-        console.error('Erro ao salvar no banco:', err);
-        showToast('Erro ao salvar no armazenamento local do navegador.');
-      }
+      } catch (e) { console.warn('Auditoria LGPD não registrada:', e); }
+    } catch (err) {
+      console.error('Erro ao excluir no Supabase:', err);
+      showToast('Não foi possível excluir na nuvem (sem internet?). Registro mantido.');
+      return;
     }
+  }
+
+  localStorage.setItem(CHAVE_BANCO_LOCAL, JSON.stringify(lista.filter(i => i.protocolo !== protocolo)));
+  desmarcarPendenteNuvem(protocolo);
+  gravarListaProtocolos(CHAVE_CONHECIDOS_NUVEM, lerListaProtocolos(CHAVE_CONHECIDOS_NUVEM).filter(p => p !== protocolo));
+  atualizarContadorBanco();
+  desenharListaBanco(document.getElementById('busca-banco-input')?.value || '');
+  showToast(`Atendimento de "${nome}" removido do banco.`);
+}
+
+// ---------- 4) ATUALIZAÇÃO AUTOMÁTICA (opcional, mas recomendada) ----------
+// Atualiza a lista ao abrir a aba, ao logar, ao voltar a internet e (se o Realtime
+// estiver ativado na tabela) quando outro computador salvar algo.
+function iniciarAtualizacaoAutomaticaBanco() {
+  let timer = null;
+  const atualizar = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => renderizarListaBanco(document.getElementById('busca-banco-input')?.value || ''), 400);
+  };
+
+  document.querySelectorAll('[data-target="sec-banco-atendimentos"]').forEach(b => b.addEventListener('click', atualizar));
+  window.addEventListener('online', atualizar);
+  try { ladirSupabase.auth.onAuthStateChange(ev => { if (ev === 'SIGNED_IN') atualizar(); }); } catch (e) {}
+  try {
+    ladirSupabase.channel('atendimentos_ladir_rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos_ladir' }, atualizar)
+      .subscribe();
+  } catch (e) { /* Realtime indisponível: segue funcionando pelos gatilhos acima */ }
+}
+window.addEventListener('load', iniciarAtualizacaoAutomaticaBanco);
 
     function carregarAtendimentoParaFicha(protocolo) {
       const lista = obterAtendimentosDoStorage();
@@ -5688,18 +5950,6 @@ ${textoVias}`;
       setActiveSection('sec-ficha-atendimento');
       showToast(`Atendimento [${registro.protocolo}] carregado na tela!`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function excluirAtendimentoDoBanco(protocolo) {
-      let lista = obterAtendimentosDoStorage();
-      const registro = lista.find(i => i.protocolo === protocolo);
-      const nome = registro ? registro.nome : protocolo;
-
-      lista = lista.filter(i => i.protocolo !== protocolo);
-      localStorage.setItem('ladir_banco_atendimentos', JSON.stringify(lista));
-      atualizarContadorBanco();
-      renderizarListaBanco();
-      showToast(`Atendimento de "${nome}" removido do banco.`);
     }
 
     function exportarBancoParaCSV() {
