@@ -73,6 +73,12 @@
         justify-content: space-between;
       }
     }
+    @media print {
+      body.imprimindo-roteiro-bpc * { visibility: hidden !important; }
+      body.imprimindo-roteiro-bpc #container-roteiro-gerado,
+      body.imprimindo-roteiro-bpc #container-roteiro-gerado * { visibility: visible !important; }
+      body.imprimindo-roteiro-bpc #container-roteiro-gerado { position: absolute; left: 0; top: 0; width: 100%; }
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
@@ -302,6 +308,10 @@
            <button data-target="sec-trabalho" class="nav-btn w-full text-left px-3 py-2 rounded-lg font-medium text-slate-700 hover:bg-slate-100 transition flex items-center space-x-2.5">
             <span>⚖️</span>
             <span>Módulo Trabalhista</span>
+          </button>
+          <button data-target="sec-bpc-loas" class="nav-btn w-full text-left px-3 py-2 rounded-lg font-medium text-slate-700 hover:bg-slate-100 transition flex items-center space-x-2.5">
+            <span>🧓</span>
+            <span>BPC/LOAS</span>
           </button>
           <button data-target="sec-geradores" class="nav-btn w-full text-left px-3 py-2 rounded-lg font-medium text-slate-700 hover:bg-slate-100 transition flex items-center space-x-2.5">
             <span>⚡</span>
@@ -2030,7 +2040,7 @@
       <!-- ========================================== -->
     <!-- MÓDULO BPC/LOAS, TEMA 173 & SAO DO TRF3    -->
     <!-- ========================================== -->
-    <section id="sec-bpc-loas" class="space-y-6 hidden">
+   <section id="sec-bpc-loas" class="content-section space-y-6 hidden">
       
       <!-- Cabeçalho da Seção -->
       <div class="bg-gradient-to-r from-sky-800 to-sky-950 rounded-xl p-6 text-white shadow-md">
@@ -5196,13 +5206,13 @@ Orientações: Acompanhar prazos e protocolar renovações dentro da janela temp
         <div class="border-b border-slate-200 pb-2 flex justify-between items-center">
           <div>
             <div class="font-bold text-sky-900 text-sm">LADIR / LAPREVS • ROTEIRO DE ORIENTAÇÃO AO ASSISTIDO</div>
-            <div class="text-[11px] text-slate-500">Posto de Atendimento • Procon Estadual (Campo Grande/MS) | Protocolo: ${protocoloFicha}</div>
+            <div class="text-[11px] text-slate-500">Posto de Atendimento • Procon Estadual (Campo Grande/MS) | Protocolo: ${escHtml(protocoloFicha)}</div>
           </div>
-          <button onclick="window.print()" class="px-2.5 py-1 bg-slate-800 text-white rounded text-[11px] font-bold hover:bg-slate-900 cursor-pointer">🖨️ Imprimir</button>
+          <button onclick="document.body.classList.add('imprimindo-roteiro-bpc'); window.print();" class="print:hidden px-2.5 py-1 bg-slate-800 text-white rounded text-[11px] font-bold hover:bg-slate-900 cursor-pointer">🖨️ Imprimir</button>
         </div>
 
         <div class="space-y-2 text-xs text-slate-700 pt-1">
-          <p><b>Assistido(a):</b> ${nomeAssistido}</p>
+          <p><b>Assistido(a):</b> ${escHtml(nomeAssistido)}</p>
           <p class="font-semibold text-sky-900">Orientações para o Benefício de Prestação Continuada (BPC/LOAS):</p>
           
           <div class="bg-slate-50 p-2.5 rounded border border-slate-200 space-y-1">
@@ -5235,6 +5245,8 @@ Orientações: Acompanhar prazos e protocolar renovações dentro da janela temp
       container.scrollIntoView({ behavior: 'smooth' });
     }
 
+    window.addEventListener('afterprint', () => document.body.classList.remove('imprimindo-roteiro-bpc'));
+    
     // ---------- retornos ----------
     function preencherSelectRetorno(valor) {
       const sel = document.getElementById('ret-caso'); if (!sel) return;
