@@ -1844,6 +1844,122 @@
     </section>
 
       <!-- ========================================== -->
+    <!-- ABA DE AUTODECLARAÇÕES (MODELOS GENÉRICOS) -->
+    <!-- ========================================== -->
+    <section id="sec-autodeclaracoes" class="space-y-6 hidden">
+
+      <!-- Cabeçalho -->
+      <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center space-x-3">
+          <span class="w-9 h-9 rounded-lg bg-amber-700 text-white flex items-center justify-center text-sm font-bold">
+            A
+          </span>
+          <div>
+            <h2 class="font-bold text-slate-900 text-base">
+              Autodeclarações (Modelos Genéricos)
+            </h2>
+            <p class="text-xs text-slate-500">
+              Modelos declaratórios independentes da aba de encaminhamentos, sem nome fixo no corpo do texto.
+            </p>
+          </div>
+        </div>
+        <span class="text-[11px] font-semibold px-2.5 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200">
+          Uso declaratório • Sem vínculo com encaminhamento
+        </span>
+      </div>
+
+      <!-- Orientação rápida -->
+      <div class="p-4 rounded-xl border border-amber-200 bg-amber-50/70 text-xs text-amber-950">
+        <span class="font-bold">Regra da aba:</span> Utilize estes modelos apenas para declarações firmadas pelo(a) assistido(a). Para direcionar o caso a outro setor ou equipe (como a LAPREVS), utilize a <strong>Aba de Encaminhamentos</strong>.
+      </div>
+
+      <!-- Grade de modelos -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <!-- 1. Residência -->
+        <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-slate-900 text-sm">1. Autodeclaração de Residência</h3>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">Modelo genérico</span>
+            </div>
+            <p class="text-xs text-slate-600">
+              Para situações em que o(a) assistido(a) não possui comprovante de endereço próprio em Campo Grande/MS.
+            </p>
+            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700">
+              "Declaro para os devidos fins, sob as penas da lei, que resido atualmente no endereço informado nos dados de identificação, em Campo Grande/MS."
+            </div>
+          </div>
+          <button type="button" onclick="carregarModeloAutodeclaracao('residencia')"
+            class="w-full py-2 px-3 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold transition cursor-pointer">
+            Abrir modelo de Residência
+          </button>
+        </div>
+
+        <!-- 2. Hipossuficiência -->
+        <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-slate-900 text-sm">2. Autodeclaração de Hipossuficiência</h3>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">Modelo genérico</span>
+            </div>
+            <p class="text-xs text-slate-600">
+              Declaração de insuficiência de recursos para custear despesas ou atos sem prejuízo do sustento próprio e familiar.
+            </p>
+            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700">
+              "Declaro, para os devidos fins, sob as penas da lei, que não possuo condições financeiras de arcar com custos sem prejuízo do sustento próprio e da minha família."
+            </div>
+          </div>
+          <button type="button" onclick="carregarModeloAutodeclaracao('hipossuficiencia')"
+            class="w-full py-2 px-3 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold transition cursor-pointer">
+            Abrir modelo de Hipossuficiência
+          </button>
+        </div>
+
+        <!-- 3. União Estável -->
+        <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-slate-900 text-sm">3. Autodeclaração de União Estável</h3>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">Modelo genérico</span>
+            </div>
+            <p class="text-xs text-slate-600">
+              Para fins declaratórios de convivência pública, contínua e duradoura com o objetivo de constituição de família.
+            </p>
+            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700">
+              "Declaro para os devidos fins, sob as penas da lei, que mantenho convivência pública, contínua e duradoura com o(a) companheiro(a) qualificado(a) nos campos próprios, com objetivo de constituição de família."
+            </div>
+          </div>
+          <button type="button" onclick="carregarModeloAutodeclaracao('uniao-estavel')"
+            class="w-full py-2 px-3 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold transition cursor-pointer">
+            Abrir modelo de União Estável
+          </button>
+        </div>
+
+        <!-- 4. Dependência Econômica -->
+        <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-slate-900 text-sm">4. Autodeclaração de Dependência Econômica</h3>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">Modelo genérico</span>
+            </div>
+            <p class="text-xs text-slate-600">
+              Para instrução declaratória de dependência econômica entre familiares ou membros do núcleo doméstico.
+            </p>
+            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700">
+              "Declaro para os devidos fins, sob as penas da lei, a situação de dependência econômica conforme os dados registrados nos campos de qualificação deste documento."
+            </div>
+          </div>
+          <button type="button" onclick="carregarModeloAutodeclaracao('dependencia-economica')"
+            class="w-full py-2 px-3 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold transition cursor-pointer">
+            Abrir modelo de Dependência Econômica
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+      <!-- ========================================== -->
     <!-- MÓDULO BPC/LOAS, TEMA 173 & SAO DO TRF3    -->
     <!-- ========================================== -->
    <section id="sec-bpc-loas" class="content-section space-y-6 hidden">
