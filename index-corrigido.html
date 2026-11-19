@@ -79,6 +79,12 @@
       body.imprimindo-roteiro-bpc #container-roteiro-gerado * { visibility: visible !important; }
       body.imprimindo-roteiro-bpc #container-roteiro-gerado { position: absolute; left: 0; top: 0; width: 100%; }
     }
+        @media print {
+      body.imprimindo-autodeclaracao * { visibility: hidden !important; }
+      body.imprimindo-autodeclaracao #container-autodeclaracao,
+      body.imprimindo-autodeclaracao #container-autodeclaracao * { visibility: visible !important; }
+      body.imprimindo-autodeclaracao #container-autodeclaracao { position: absolute; left: 0; top: 0; width: 100%; border: 0 !important; }
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
@@ -312,6 +318,10 @@
           <button data-target="sec-bpc-loas" class="nav-btn w-full text-left px-3 py-2 rounded-lg font-medium text-slate-700 hover:bg-slate-100 transition flex items-center space-x-2.5">
             <span>🧓</span>
             <span>BPC/LOAS</span>
+          </button>
+           <button sec-autodeclaracoes="sec-bpc-loas" class="nav-btn w-full text-left px-3 py-2 rounded-lg font-medium text-slate-700 hover:bg-slate-100 transition flex items-center space-x-2.5">
+            <span>✍️</span>
+            <span>Autodeclarações</span>
           </button>
           <button data-target="sec-geradores" class="nav-btn w-full text-left px-3 py-2 rounded-lg font-medium text-slate-700 hover:bg-slate-100 transition flex items-center space-x-2.5">
             <span>⚡</span>
@@ -1846,7 +1856,7 @@
       <!-- ========================================== -->
     <!-- ABA DE AUTODECLARAÇÕES (MODELOS GENÉRICOS) -->
     <!-- ========================================== -->
-    <section id="sec-autodeclaracoes" class="space-y-6 hidden">
+    <section id="sec-autodeclaracoes" class="content-section space-y-6 hidden">
 
       <!-- Cabeçalho -->
       <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs flex flex-wrap items-center justify-between gap-3">
@@ -1957,6 +1967,7 @@
         </div>
 
       </div>
+            <div id="container-autodeclaracao" class="hidden mt-6 p-6 bg-white text-slate-900 rounded-xl border border-slate-300 space-y-4 text-sm"></div>
     </section>
 
       <!-- ========================================== -->
@@ -5169,6 +5180,55 @@ Orientações: Acompanhar prazos e protocolar renovações dentro da janela temp
     }
 
     window.addEventListener('afterprint', () => document.body.classList.remove('imprimindo-roteiro-bpc'));
+
+    function carregarModeloAutodeclaracao(tipo) {
+      const container = document.getElementById('container-autodeclaracao');
+      if (!container) return;
+
+      const c = w => `<span class="inline-block border-b border-slate-600 align-bottom" style="min-width:${w}px">&nbsp;</span>`;
+      const modelos = {
+        'residencia': {
+          titulo: 'DECLARAÇÃO DE RESIDÊNCIA',
+          corpo: `Eu, ${c(280)}, nacionalidade ${c(130)}, portador(a) do documento (CRNM / protocolo / passaporte / CPF) nº ${c(180)}, DECLARO, para os devidos fins e sob as penas da lei, que resido no endereço ${c(300)}, bairro ${c(140)}, em Campo Grande/MS, CEP ${c(90)}, desde ${c(110)}.`
+        },
+        'hipossuficiencia': {
+          titulo: 'DECLARAÇÃO DE HIPOSSUFICIÊNCIA ECONÔMICA',
+          corpo: `Eu, ${c(280)}, nacionalidade ${c(130)}, portador(a) do documento nº ${c(180)}, DECLARO, para os devidos fins e sob as penas da lei, que não possuo condições de arcar com custas, taxas ou despesas sem prejuízo do meu sustento e do de minha família. Minha renda mensal aproximada é de R$ ${c(110)} e moram comigo ${c(40)} pessoa(s).`
+        },
+        'uniao-estavel': {
+          titulo: 'DECLARAÇÃO DE UNIÃO ESTÁVEL',
+          corpo: `Eu, ${c(280)}, documento nº ${c(160)}, e ${c(280)}, documento nº ${c(160)}, DECLARAMOS, para os devidos fins e sob as penas da lei, que mantemos convivência pública, contínua e duradoura, com o objetivo de constituir família, desde ${c(110)}, residindo no endereço ${c(300)}, em Campo Grande/MS.`
+        },
+        'dependencia-economica': {
+          titulo: 'DECLARAÇÃO DE DEPENDÊNCIA ECONÔMICA',
+          corpo: `Eu, ${c(280)}, documento nº ${c(160)}, DECLARO, para os devidos fins e sob as penas da lei, que ${c(280)}, documento nº ${c(160)}, grau de parentesco ${c(130)}, depende economicamente de mim para o seu sustento, residindo no endereço ${c(300)}, em Campo Grande/MS.`
+        }
+      };
+
+      const m = modelos[tipo];
+      if (!m) return;
+
+      container.classList.remove('hidden');
+      container.innerHTML = `
+        <div class="flex justify-between items-center border-b border-slate-200 pb-2 print:hidden">
+          <div class="text-[11px] text-slate-500">Modelo genérico em branco, para preenchimento pelo(a) próprio(a) declarante.</div>
+          <button type="button" onclick="document.body.classList.add('imprimindo-autodeclaracao'); window.print();" class="px-2.5 py-1 bg-slate-800 text-white rounded text-[11px] font-bold hover:bg-slate-900 cursor-pointer">🖨️ Imprimir</button>
+        </div>
+        <div class="text-center font-bold text-base pt-2">${m.titulo}</div>
+        <p class="text-justify" style="line-height:2.2">${m.corpo}</p>
+        <p class="pt-3">Campo Grande/MS, ${c(40)} de ${c(120)} de ${c(60)}.</p>
+        <div class="pt-10 text-center">
+          <div class="mx-auto border-t border-slate-700" style="width:320px"></div>
+          <div class="text-xs">Assinatura do(a) declarante</div>
+        </div>
+        <div class="text-[10px] text-slate-400 text-center pt-4 border-t border-slate-100">
+          Modelo educacional gratuito da extensão universitária LADIR/UFMS. A declaração falsa pode configurar crime (art. 299 do Código Penal).
+        </div>
+      `;
+      container.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    window.addEventListener('afterprint', () => document.body.classList.remove('imprimindo-autodeclaracao'));
     
     // ---------- retornos ----------
     function preencherSelectRetorno(valor) {
@@ -7603,10 +7663,6 @@ LADIR • Faculdade de Direito • FADIR / UFMS`;
       window.setActiveSection('sec-simulador');
     }
   };
-
-function gerarRoteiroEncaminhamentoAssistido() {
-      // ... código existente ...
-    }
 
     function alternarBlocoDetalhe(idBloco, idIcone, idTexto) {
       const bloco = document.getElementById(idBloco);
