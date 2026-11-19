@@ -572,560 +572,359 @@
         <!-- Estrutura dos 4 Blocos de Atendimento (Container) -->
         <div id="ficha-blocos-container" class="space-y-6">
 
-          <!-- BLOCO I: QUALIFICAÇÃO & DADOS SOCIODEMOGRÁFICOS DO ASSISTIDO -->
-          <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs">
-            <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-              <div class="flex items-center space-x-2.5">
-                <span class="w-7 h-7 rounded-lg bg-brand-800 text-white flex items-center justify-center text-xs font-bold shadow-2xs">I</span>
-                <div>
-                  <h3 class="font-bold text-brand-900 text-sm sm:text-base">Qualificação & Dados Sociodemográficos do Assistido</h3>
-                  <p class="text-[11px] text-slate-500">Identificação civil, documentos de viagem, moradia e contatos em Campo Grande</p>
-                </div>
-              </div>
-              <span class="text-[10px] bg-slate-100 text-slate-700 font-semibold px-2 py-0.5 rounded border border-slate-200">
-                LADIR / UFMS
-              </span>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs text-slate-700">
-              <div class="sm:col-span-2">
-                <label class="block font-bold text-slate-700 mb-1">Nome Completo do Assistido (como consta no documento): <span class="text-red-500">*</span></label>
-                <input type="text" id="fa-nome" placeholder="Ex: Jean Luc Pierre" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-
-              <div class="sm:col-span-2">
-                <label class="block font-bold text-slate-700 mb-1">Nome Social (se aplicável - Dec. Federal 8.727/16):</label>
-                <input type="text" id="fa-nome-social" placeholder="Identidade de gênero autoatribuída" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">País de Origem / Procedência: <span class="text-red-500">*</span></label>
-                <input type="text" id="fa-pais-origem" placeholder="Ex: Haiti, Venezuela, Bolívia..." class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Nacionalidade: <span class="text-red-500">*</span></label>
-                <input type="text" id="fa-nacionalidade" placeholder="Ex: Haitiana, Venezuelana..." class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Data de Nascimento: <span class="text-red-500">*</span></label>
-                <input type="date" id="fa-data-nasc" onchange="calcularIdadeFicha()" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-                <span id="fa-idade-display" class="text-[10px] text-slate-500 mt-0.5 block">Idade: -- anos</span>
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Gênero / Sexo: <span class="text-red-500">*</span></label>
-                <select id="fa-genero" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-                  <option value="">Selecione...</option>
-                  <option value="Feminino">Feminino</option>
-                  <option value="Masculino">Masculino</option>
-                  <option value="Não-binário">Não-binário</option>
-                  <option value="Outro / Não declarado">Outro / Não declarado</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Estado Civil:</label>
-                <select id="fa-estado-civil" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-                  <option value="Solteiro(a)">Solteiro(a)</option>
-                  <option value="Casado(a)">Casado(a)</option>
-                  <option value="União Estável">União Estável</option>
-                  <option value="Divorciado(a) / Separado(a)">Divorciado(a) / Separado(a)</option>
-                  <option value="Viúvo(a)">Viúvo(a)</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Idioma Materno: <span class="text-red-500">*</span></label>
-                <input type="text" id="fa-idioma" placeholder="Ex: Crioulo Haitiano, Espanhol..." class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 font-semibold text-brand-900 transition">
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Compreensão em Português:</label>
-                <select id="fa-nivel-portugues" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-                  <option value="Não fala/compreende (necessita intérprete)">Não compreende (necessita intérprete)</option>
-                  <option value="Básico (compreende palavras simples)">Básico (palavras simples)</option>
-                  <option value="Intermediário (comunica-se com auxílio)">Intermediário (comunica com auxílio)</option>
-                  <option value="Fluente / Avançado">Fluente / Avançado</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Documento de Origem & Nº: <span class="text-red-500">*</span></label>
-                <input type="text" id="fa-doc-origem" placeholder="Ex: Passaporte nº AA123456 ou DNI..." class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Número do CPF no Brasil:</label>
-                <input type="text" id="fa-cpf" placeholder="000.000.000-00 ou 'Não possui'" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">RNM / Protocolo SISCONARE:</label>
-                <input type="text" id="fa-rnm-protocolo" placeholder="Nº do DPRNM ou Protocolo CONARE" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Telefone com WhatsApp (DDD): <span class="text-red-500">*</span></label>
-                <input type="text" id="fa-telefone" placeholder="(67) 99999-9999" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">E-mail Pessoal:</label>
-                <input type="email" id="fa-email" placeholder="usuario@email.com" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Tempo de Residência no Brasil:</label>
-                <input type="text" id="fa-tempo-brasil" placeholder="Ex: 3 meses / 1 ano e 2 meses" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Possui Filho(a) Brasileiro(a) Nato(a)?</label>
-                <select id="fa-filho-brasileiro" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 font-semibold text-brand-900 transition">
-                  <option value="Não">Não</option>
-                  <option value="Sim (1 filho)">Sim (1 filho brasileiro)</option>
-                  <option value="Sim (2 ou mais filhos)">Sim (2 ou mais filhos brasileiros)</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Nº de Dependentes no Brasil:</label>
-                <input type="number" id="fa-dependentes-qtd" min="0" value="0" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Situação Habitacional em Campo Grande:</label>
-                <select id="fa-tipo-moradia" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-                  <option value="Casa/Apartamento Alugado">Aluguel particular</option>
-                  <option value="Casa/Apartamento Cedido ou de Amigos">Cedida por familiares/amigos</option>
-                  <option value="Abrigo Institucional / Casa de Passagem">Abrigo institucional / Casa de Passagem</option>
-                  <option value="Comunidade / Ocupação / Informal">Ocupação / Assentamento informal</option>
-                  <option value="Situação de Rua">Situação de rua temporária</option>
-                  <option value="Imóvel Próprio">Imóvel próprio</option>
-                </select>
-              </div>
-
-              <div class="sm:col-span-2 lg:col-span-3">
-                <label class="block font-bold text-slate-700 mb-1">Endereço Residencial Completo em Campo Grande: <span class="text-red-500">*</span></label>
-                <input type="text" id="fa-endereco" placeholder="Rua, número, complemento e bairro (ex: Rua das Palmeiras, 120, Bairro Aero Rancho)" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">CEP (se souber):</label>
-                <input type="text" id="fa-cep" placeholder="79000-000" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-            </div>
-          </div>
-
-          <!-- BLOCO II: TRIAGEM DE VULNERABILIDADE & PERFIL SOCIOECONÔMICO -->
-          <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs">
-            <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-              <div class="flex items-center space-x-2.5">
-                <span class="w-7 h-7 rounded-lg bg-accent-600 text-white flex items-center justify-center text-xs font-bold shadow-2xs">II</span>
-                <div>
-                  <h3 class="font-bold text-brand-900 text-sm sm:text-base">Triagem de Vulnerabilidade & Perfil Socioeconômico</h3>
-                  <p class="text-[11px] text-slate-500">Renda familiar, situação de trabalho, acesso a benefícios e marcadores prioritários de proteção</p>
-                </div>
-              </div>
-              <span class="text-[10px] bg-amber-50 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">
-                Avaliação de Hipossuficiência
-              </span>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs text-slate-700 mb-4">
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Situação Ocupacional Atual: <span class="text-red-500">*</span></label>
-                <select id="fa-situacao-trabalho" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-                  <option value="Desempregado(a) / Sem renda">Desempregado(a) / Sem renda</option>
-                  <option value="Trabalho Informal / Bicos / Diárias">Trabalho Informal / Bicos / Diárias</option>
-                  <option value="Autônomo(a) / MEI">Autônomo(a) / MEI</option>
-                  <option value="Empregado(a) com Carteira Assinada (CLT)">Empregado(a) CLT (Carteira assinada)</option>
-                  <option value="Dona de casa / Cuidado exclusivo da família">Dona de casa / Cuidado familiar</option>
-                  <option value="Estudante">Estudante</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Profissão no País de Origem:</label>
-                <input type="text" id="fa-profissao-origem" placeholder="Ex: Professor, Pedreiro, Enfermeiro..." class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Renda Familiar Mensal Total (R$): <span class="text-red-500">*</span></label>
-                <input type="number" id="fa-renda-total" min="0" step="50" placeholder="Ex: 800" oninput="calcularRendaPerCapitaFicha()" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 font-semibold text-brand-900 transition">
-              </div>
-
-              <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex flex-col justify-between">
-                <span class="text-[10px] uppercase font-bold text-slate-500">Renda Per Capita Estimada:</span>
-                <span id="fa-renda-per-capita-display" class="font-extrabold text-sm text-brand-900">R$ 0,00 / pessoa</span>
-                <span id="fa-enquadramento-renda" class="text-[10px] text-slate-500 font-medium">Informe a renda e dependentes</span>
-              </div>
-            </div>
-
-            <div class="mb-4 pt-3 border-t border-slate-100">
-              <span class="block font-bold text-slate-800 text-xs mb-2">Acesso a Benefícios & Serviços Públicos em Campo Grande:</span>
-              <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-[11px] text-slate-700">
-                <label class="flex items-center space-x-1.5 p-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="checkbox" id="fa-ben-cadunico" class="rounded border-slate-300 text-brand-800 focus:ring-brand-800">
-                  <span class="font-medium">CadÚnico (NIS)</span>
-                </label>
-                <label class="flex items-center space-x-1.5 p-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="checkbox" id="fa-ben-bolsafamilia" class="rounded border-slate-300 text-brand-800 focus:ring-brand-800">
-                  <span class="font-medium">Bolsa Família</span>
-                </label>
-                <label class="flex items-center space-x-1.5 p-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="checkbox" id="fa-ben-sus" class="rounded border-slate-300 text-brand-800 focus:ring-brand-800">
-                  <span class="font-medium">Cartão SUS</span>
-                </label>
-                <label class="flex items-center space-x-1.5 p-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="checkbox" id="fa-ben-banco" class="rounded border-slate-300 text-brand-800 focus:ring-brand-800">
-                  <span class="font-medium">Conta Bancária</span>
-                </label>
-                <label class="flex items-center space-x-1.5 p-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="checkbox" id="fa-ben-onibus" class="rounded border-slate-300 text-brand-800 focus:ring-brand-800">
-                  <span class="font-medium">Cartão de Ônibus</span>
-                </label>
-                <label class="flex items-center space-x-1.5 p-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="checkbox" id="fa-ben-ctps" class="rounded border-slate-300 text-brand-800 focus:ring-brand-800">
-                  <span class="font-medium">CTPS Digital</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="pt-3 border-t border-slate-100">
-              <div class="flex items-center justify-between mb-2">
-                <span class="font-bold text-red-900 text-xs flex items-center space-x-1">
-                  <span>🚨</span>
-                  <span>Marcadores de Vulnerabilidade Prioritária:</span>
-                </span>
-                <span class="text-[10px] text-slate-500">Marque todas as condições verificadas</span>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
-                <label class="flex items-start space-x-2 p-2 rounded-lg bg-red-50/50 border border-red-200/70 hover:bg-red-50 cursor-pointer">
-                  <input type="checkbox" id="fa-vuln-mulher" class="mt-0.5 rounded border-red-300 text-red-700 focus:ring-red-600">
-                  <div>
-                    <span class="font-bold text-red-950 block text-[11px]">Mulher em Risco / Violência Doméstica</span>
-                    <span class="text-[10px] text-red-800">Prioridade Casa da Mulher Brasileira / NUDEM</span>
-                  </div>
-                </label>
-
-                <label class="flex items-start space-x-2 p-2 rounded-lg bg-amber-50/50 border border-amber-200/70 hover:bg-amber-50 cursor-pointer">
-                  <input type="checkbox" id="fa-vuln-gestante" class="mt-0.5 rounded border-amber-300 text-amber-700 focus:ring-amber-600">
-                  <div>
-                    <span class="font-bold text-amber-950 block text-[11px]">Gestante, Lactante ou Criança de Colo</span>
-                    <span class="text-[10px] text-amber-800">Encaminhamento para pré-natal / UBS</span>
-                  </div>
-                </label>
-
-                <label class="flex items-start space-x-2 p-2 rounded-lg bg-amber-50/50 border border-amber-200/70 hover:bg-amber-50 cursor-pointer">
-                  <input type="checkbox" id="fa-vuln-escola" class="mt-0.5 rounded border-amber-300 text-amber-700 focus:ring-amber-600">
-                  <div>
-                    <span class="font-bold text-amber-950 block text-[11px]">Filho(s) em Idade Escolar Fora da Escola</span>
-                    <span class="text-[10px] text-amber-800">Matrícula compulsória na REME/SED</span>
-                  </div>
-                </label>
-
-                <label class="flex items-start space-x-2 p-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="checkbox" id="fa-vuln-idoso" class="mt-0.5 rounded border-slate-300 text-brand-800 focus:ring-brand-800">
-                  <div>
-                    <span class="font-bold text-slate-800 block text-[11px]">Idoso (60+ anos) ou PCD</span>
-                    <span class="text-[10px] text-slate-600">Prioridade de atendimento e triagem BPC/LOAS</span>
-                  </div>
-                </label>
-
-                <label class="flex items-start space-x-2 p-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="checkbox" id="fa-vuln-idioma" class="mt-0.5 rounded border-slate-300 text-brand-800 focus:ring-brand-800">
-                  <div>
-                    <span class="font-bold text-slate-800 block text-[11px]">Barreira Linguística Severa</span>
-                    <span class="text-[10px] text-slate-600">Necessita de intérprete e apoio presencial</span>
-                  </div>
-                </label>
-
-                <label class="flex items-start space-x-2 p-2 rounded-lg bg-red-50/70 border border-red-300 hover:bg-red-50 cursor-pointer">
-                  <input type="checkbox" id="fa-vuln-trafico" class="mt-0.5 rounded border-red-400 text-red-800 focus:ring-red-600">
-                  <div>
-                    <span class="font-bold text-red-950 block text-[11px]">Suspeita de Trabalho Escravo ou Tráfico</span>
-                    <span class="text-[10px] text-red-800">Articulação com CETRAP/DPU</span>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <div class="mt-3.5 pt-3 border-t border-slate-100">
-              <label class="block font-bold text-slate-700 text-xs mb-1">Observações Complementares da Avaliação Socioeconômica:</label>
-              <input type="text" id="fa-obs-socio" placeholder="Ex: Família necessita de cesta básica; mãe solo com 2 filhos; aguarda vaga escolar..." class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-            </div>
-          </div>
-
-          <!-- BLOCO III: HISTÓRICO MIGRATÓRIO & DIAGNÓSTICO JURÍDICO -->
-          <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs">
-            <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-              <div class="flex items-center space-x-2.5">
-                <span class="w-7 h-7 rounded-lg bg-brand-800 text-white flex items-center justify-center text-xs font-bold shadow-2xs">III</span>
-                <div>
-                  <h3 class="font-bold text-brand-900 text-sm sm:text-base">Histórico Migratório, Relato dos Fatos & Diagnóstico Jurídico</h3>
-                  <p class="text-[11px] text-slate-500">Trajeto de ingresso, motivação de refúgio/residência, relato técnico e via jurídica indicada</p>
-                </div>
-              </div>
-              <button onclick="importarSimuladorParaFicha()" class="text-xs bg-sky-50 hover:bg-sky-100 text-brand-800 font-bold px-3 py-1.5 rounded-lg border border-sky-300 transition flex items-center space-x-1.5 shadow-2xs">
-                <span>🧭</span>
-                <span>Importar do Simulador</span>
-              </button>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs text-slate-700 mb-4">
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Data de Entrada no Brasil: <span class="text-red-500">*</span></label>
-                <input type="date" id="fa-data-ingresso" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Local / Fronteira de Entrada: <span class="text-red-500">*</span></label>
-                <input type="text" id="fa-local-ingresso" placeholder="Ex: Pacaraima/RR, Corumbá/MS..." class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Via de Transporte:</label>
-                <select id="fa-via-ingresso" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-                  <option value="Terrestre (Ônibus / Carro)">Terrestre (Ônibus / Carro)</option>
-                  <option value="Terrestre (A pé)">Terrestre (A pé)</option>
-                  <option value="Aérea (Aeroporto internacional)">Aérea</option>
-                  <option value="Fluvial / Marítima">Fluvial / Marítima</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Condição Documental:</label>
-                <select id="fa-condicao-ingresso" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition">
-                  <option value="Sem visto prévio (fronteira terrestre)">Sem visto prévio</option>
-                  <option value="Com Visto Temporário Consular">Com Visto Temporário</option>
-                  <option value="Com Visto de Visita / Turista">Com Visto de Turismo</option>
-                  <option value="Solicitação direta de refúgio na fronteira">Solicitou refúgio na fronteira</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="mb-4 pt-3 border-t border-slate-100">
-              <label class="block font-bold text-slate-800 text-xs mb-1.5">Motivo Primordial da Saída: <span class="text-red-500">*</span></label>
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
-                <label class="flex items-start space-x-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="radio" name="fa-motivo-saida" value="Grave e generalizada violação de direitos humanos (Cartagena / Art. 1º, III da Lei 9.474/97)" class="mt-0.5 text-brand-800 focus:ring-brand-800">
-                  <div>
-                    <span class="font-bold text-slate-900 block text-[11px]">Grave Crise de Direitos Humanos</span>
-                    <span class="text-[10px] text-slate-600">Art. 1º, III da Lei 9.474/97 (Venezuela, Haiti, Síria...)</span>
-                  </div>
-                </label>
-
-                <label class="flex items-start space-x-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="radio" name="fa-motivo-saida" value="Perseguição individual (opinião política, raça, religião, grupo social - Art. 1º, I)" class="mt-0.5 text-brand-800 focus:ring-brand-800">
-                  <div>
-                    <span class="font-bold text-slate-900 block text-[11px]">Perseguição Individual Direta</span>
-                    <span class="text-[10px] text-slate-600">Art. 1º, I (política, religião, raça ou grupo)</span>
-                  </div>
-                </label>
-
-                <label class="flex items-start space-x-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="radio" name="fa-motivo-saida" value="Reunificação e convivência familiar no Brasil" class="mt-0.5 text-brand-800 focus:ring-brand-800">
-                  <div>
-                    <span class="font-bold text-slate-900 block text-[11px]">Reunificação Familiar</span>
-                    <span class="text-[10px] text-slate-600">Filho brasileiro, cônjuge ou dependente</span>
-                  </div>
-                </label>
-
-                <label class="flex items-start space-x-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="radio" name="fa-motivo-saida" value="Migração econômica, busca de emprego e subsistência digna" class="mt-0.5 text-brand-800 focus:ring-brand-800">
-                  <div>
-                    <span class="font-bold text-slate-900 block text-[11px]">Trabalho & Subsistência Econômica</span>
-                    <span class="text-[10px] text-slate-600">Busca por trabalho formal (Mercosul ou acolhida)</span>
-                  </div>
-                </label>
-
-                <label class="flex items-start space-x-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="radio" name="fa-motivo-saida" value="Estudos, pesquisa ou formação profissional" class="mt-0.5 text-brand-800 focus:ring-brand-800">
-                  <div>
-                    <span class="font-bold text-slate-900 block text-[11px]">Estudo & Formação Acadêmica</span>
-                    <span class="text-[10px] text-slate-600">Matrícula em universidade / CSVM</span>
-                  </div>
-                </label>
-
-                <label class="flex items-start space-x-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="radio" name="fa-motivo-saida" value="Tratamento de saúde ou acompanhamento médico especializado" class="mt-0.5 text-brand-800 focus:ring-brand-800">
-                  <div>
-                    <span class="font-bold text-slate-900 block text-[11px]">Saúde & Tratamento Médico</span>
-                    <span class="text-[10px] text-slate-600">Tratamento terapêutico ou emergencial</span>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <!-- Pretensão de Retorno ao País Natal -->
-            <div class="mb-4 p-3 rounded-lg bg-amber-50/80 border border-amber-200 text-xs">
-              <span class="font-bold text-amber-950 block mb-1">Critério Crítico: Pretensão ou Necessidade de Viagem de Volta ao País de Origem</span>
-              <p class="text-amber-900 leading-relaxed mb-2">
-                A solicitação de refúgio acarreta a proibição absoluta de viagem ao país de origem sob pena de renúncia sumária.
-              </p>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                <label class="flex items-center space-x-2 p-2 bg-white rounded border border-amber-300 cursor-pointer">
-                  <input type="radio" name="fa-pretende-viagem" value="Sim (precisa viajar ao país natal)" class="text-brand-800 focus:ring-brand-800">
-                  <span class="font-bold text-slate-800">SIM: Necessita de via de Residência (Mercosul, Familiar, etc.)</span>
-                </label>
-                <label class="flex items-center space-x-2 p-2 bg-white rounded border border-amber-300 cursor-pointer">
-                  <input type="radio" name="fa-pretende-viagem" value="Não (impossível regressar por perigo de vida/liberdade)" class="text-brand-800 focus:ring-brand-800">
-                  <span class="font-bold text-slate-800">NÃO: Não pode regressar (Elegível a Refúgio SISCONARE)</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="mb-4 pt-3 border-t border-slate-100">
-              <label class="block font-bold text-slate-800 text-xs mb-1">Relato Circunstanciado dos Fatos: <span class="text-red-500">*</span></label>
-              <textarea id="fa-relato-fatos" rows="4" placeholder="Descreva os fatos detalhados: cidade de origem, perseguições, rota e motivos da saída..." class="w-full p-3 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 leading-relaxed font-sans transition"></textarea>
-            </div>
-
-            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-3">
-                <div>
-                  <label class="block font-bold text-slate-700 mb-1">Via Jurídica Recomendada: <span class="text-red-500">*</span></label>
-                  <select id="fa-via-recomendada" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs bg-white font-bold text-brand-900 focus:ring-1 focus:ring-brand-800 transition">
-                    <option value="">Selecione o enquadramento...</option>
-                    <option value="Solicitação de Reconhecimento da Condição de Refugiado (SISCONARE / Lei nº 9.474/97)">Solicitação de Refúgio (SISCONARE / Lei 9.474/97)</option>
-                    <option value="Autorização de Residência com Base no Acordo do Mercosul (Decreto nº 6.975/2009)">Residência com Base no Acordo do Mercosul (Dec. 6.975/09)</option>
-                    <option value="Autorização de Residência por Reunião Familiar (Art. 30, II da Lei nº 13.445/2017)">Residência por Reunião Familiar (Art. 30, II, Lei 13.445/17)</option>
-                    <option value="Autorização de Residência por Acolhida Humanitária (Portarias Interministeriais Vigentes)">Residência por Acolhida Humanitária (Portarias)</option>
-                    <option value="Registro de Visto Temporário Consular na Polícia Federal (Art. 64, Decreto nº 9.199/17)">Registro de Visto Temporário Consular na PF</option>
-                    <option value="Inscrição / Regularização Exclusiva de CPF (Receita Federal do Brasil)">Regularização Exclusiva de CPF (Receita Federal)</option>
-                    <option value="Encaminhamento para Assistência Especializada da DPU (Caso Complexo / Litígio)">Encaminhamento para DPU (Caso Complexo)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label class="block font-bold text-slate-700 mb-1">Fundamentação Normativa:</label>
-                  <input type="text" id="fa-fundamentacao-legal" placeholder="Ex: Art. 1º, III da Lei 9.474/97..." class="w-full p-2.5 border border-slate-300 rounded-lg text-xs bg-white text-slate-800 focus:ring-1 focus:ring-brand-800 transition">
-                </div>
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Síntese do Parecer Técnico:</label>
-                <input type="text" id="fa-parecer-resumo" placeholder="Ex: Assistido necessita de residência que permita viajar ao país natal; optou-se pela Reunião Familiar..." class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-white text-slate-700 focus:ring-1 focus:ring-brand-800 transition">
-              </div>
-            </div>
-          </div>
-
-          <!-- BLOCO IV: PROVIDÊNCIAS ADOTADAS, PRÓXIMOS PASSOS & ENCERRAMENTO -->
-          <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs">
-            <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-              <div class="flex items-center space-x-2.5">
-                <span class="w-7 h-7 rounded-lg bg-emerald-700 text-white flex items-center justify-center text-xs font-bold shadow-2xs">IV</span>
-                <div>
-                  <h3 class="font-bold text-brand-900 text-sm sm:text-base">Providências Adotadas, Próximos Passos & Encerramento</h3>
-                  <p class="text-[11px] text-slate-500">Atos realizados no atendimento, orientações futuras, termo de sigilo e equipe responsável</p>
-                </div>
-              </div>
-              <span class="text-[10px] bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded border border-emerald-200">
-                Conclusão do Plantão
-              </span>
-            </div>
-
-            <div class="mb-4">
-              <span class="block font-bold text-slate-800 text-xs mb-2">Providências Imediatas Realizadas Durante a Consulta:</span>
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs text-slate-700">
-                <label class="flex items-start space-x-2 p-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="checkbox" id="fa-prov-cpf" class="mt-0.5 rounded border-slate-300 text-brand-800 focus:ring-brand-800">
-                  <div>
-                    <span class="font-bold text-slate-900 block text-[11px]">Formulário FCPF Preenchido</span>
-                    <span class="text-[10px] text-slate-500">Protocolo emitido ou e-mail enviado à RFB</span>
-                  </div>
-                </label>
-
-                <label class="flex items-start space-x-2 p-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="checkbox" id="fa-prov-sisconare" class="mt-0.5 rounded border-slate-300 text-brand-800 focus:ring-brand-800">
-                  <div>
-                    <span class="font-bold text-slate-900 block text-[11px]">Solicitação SISCONARE</span>
-                    <span class="text-[10px] text-slate-500">Conta criada e solicitação salva</span>
-                  </div>
-                </label>
-
-                <label class="flex items-start space-x-2 p-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="checkbox" id="fa-prov-pf" class="mt-0.5 rounded border-slate-300 text-brand-800 focus:ring-brand-800">
-                  <div>
-                    <span class="font-bold text-slate-900 block text-[11px]">Agendamento na PF</span>
-                    <span class="text-[10px] text-slate-500">DELEMIG agendada com comprovante</span>
-                  </div>
-                </label>
-
-                <label class="flex items-start space-x-2 p-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="checkbox" id="fa-prov-encaminhamento" class="mt-0.5 rounded border-slate-300 text-brand-800 focus:ring-brand-800">
-                  <div>
-                    <span class="font-bold text-slate-900 block text-[11px]">Ficha de Encaminhamento</span>
-                    <span class="text-[10px] text-slate-500">Encaminhado para CRAS, UBS, DPE, etc.</span>
-                  </div>
-                </label>
-
-                <label class="flex items-start space-x-2 p-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="checkbox" id="fa-prov-declaracoes" class="mt-0.5 rounded border-slate-300 text-brand-800 focus:ring-brand-800">
-                  <div>
-                    <span class="font-bold text-slate-900 block text-[11px]">Declarações de Apoio Emitidas</span>
-                    <span class="text-[10px] text-slate-500">Residência, Filiação ou Hipossuficiência</span>
-                  </div>
-                </label>
-
-                <label class="flex items-start space-x-2 p-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 cursor-pointer">
-                  <input type="checkbox" id="fa-prov-orientacao" class="mt-0.5 rounded border-slate-300 text-brand-800 focus:ring-brand-800">
-                  <div>
-                    <span class="font-bold text-slate-900 block text-[11px]">Orientação Jurídica & Cidadã</span>
-                    <span class="text-[10px] text-slate-500">CTPS, saúde, ônibus e direitos básicos</span>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs mb-4 pt-3 border-t border-slate-100">
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Próximos Passos & Prazos: <span class="text-red-500">*</span></label>
-                <textarea id="fa-proximos-passos" rows="3" placeholder="Ex: Comparecer à DELEMIG em 15/08; aguardar e-mail da Receita; comparecer ao CRAS..." class="w-full p-2.5 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition"></textarea>
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">Pendências Documentais:</label>
-                <textarea id="fa-pendencias" rows="3" placeholder="Ex: Apresentar certidão de nascimento apostilada..." class="w-full p-2.5 border border-slate-300 rounded-lg text-xs bg-slate-50/50 focus:bg-white focus:ring-1 focus:ring-brand-800 transition"></textarea>
-              </div>
-            </div>
-
-            <div class="mb-4 p-3.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
-              <span class="font-bold text-brand-900 block mb-1">Termo de Consentimento & Garantia de Sigilo (Art. 26, Lei 9.474/97)</span>
-              <p class="text-slate-600 leading-relaxed text-[11px] mb-2">
-                Fica garantido que todas as informações são confidenciais e jamais serão compartilhadas com representações do país de origem.
-              </p>
-              <label class="flex items-center space-x-2 text-slate-800 font-bold cursor-pointer">
-                <input type="checkbox" id="fa-aceite-termo" checked class="rounded border-slate-300 text-brand-800 focus:ring-brand-800">
-                <span>Declaro que o assistido anuiu expressamente aos termos deste atendimento gratuito.</span>
-              </label>
-            </div>
-
-            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs mb-3">
-                <div>
-                  <label class="block font-bold text-slate-700 mb-1">Acadêmico(a) Atendente: <span class="text-red-500">*</span></label>
-                  <input type="text" id="fa-academico-nome" placeholder="Nome completo do extensionista" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-white text-slate-800 focus:ring-1 focus:ring-brand-800 transition">
-                </div>
-
-                <div>
-                  <label class="block font-bold text-slate-700 mb-1">RGA / Matrícula UFMS:</label>
-                  <input type="text" id="fa-academico-rga" placeholder="Ex: 2024.1901.000-0" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-white text-slate-800 focus:ring-1 focus:ring-brand-800 transition">
-                </div>
-
-                <div>
-                  <label class="block font-bold text-slate-700 mb-1">Orientador(a) do Plantão:</label>
-                  <input type="text" id="fa-orientador-nome" value="Coordenação LADIR • FADIR / UFMS" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-white text-slate-800 focus:ring-1 focus:ring-brand-800 transition">
-                </div>
-              </div>
-            </div>
-          </div>
-
+         <!-- ========================================== -->
+<!-- ESTRUTURA UNIFICADA DOS 4 BLOCOS (ENXUTA)  -->
+<!-- ========================================== -->
+<div id="ficha-blocos-container" class="space-y-6">
+
+  <!-- ======================================== -->
+  <!-- BLOCO I: QUALIFICAÇÃO & DADOS SOCIODEMOGRÁFICOS -->
+  <!-- ======================================== -->
+  <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3 mb-4">
+      <div class="flex items-center space-x-2.5">
+        <span class="w-7 h-7 rounded-lg bg-brand-800 text-white flex items-center justify-center text-xs font-bold">
+          I
+        </span>
+        <div>
+          <h3 class="font-bold text-brand-900 text-sm sm:text-base">
+            Qualificação &amp; Dados Sociodemográficos do Assistido
+          </h3>
+          <p class="text-[11px] text-slate-500">
+            Identificação civil, documentos de viagem, moradia e triagem rápida.
+          </p>
         </div>
+      </div>
+      <span class="text-[10px] bg-slate-100 text-slate-700 font-semibold px-2 py-0.5 rounded border border-slate-200">
+        LADIR / UFMS
+      </span>
+    </div>
 
+    <!-- Triagem rápida do Bloco I -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs text-slate-700 mb-4">
+      <div class="sm:col-span-2">
+        <label for="fa-nome" class="block font-semibold text-slate-700 mb-1">Nome completo</label>
+        <input id="fa-nome" type="text" placeholder="Nome do(a) assistido(a)"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-600">
+      </div>
+
+      <div>
+        <label for="fa-doc" class="block font-semibold text-slate-700 mb-1">Documento (CRNM / Prot. / CPF)</label>
+        <input id="fa-doc" type="text" placeholder="Número do documento"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-600">
+      </div>
+
+      <div>
+        <label for="fa-nacionalidade" class="block font-semibold text-slate-700 mb-1">Nacionalidade</label>
+        <input id="fa-nacionalidade" type="text" placeholder="Ex.: Haiti, Venezuela, Brasil..."
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-600">
+      </div>
+
+      <div>
+        <label for="fa-idioma" class="block font-semibold text-slate-700 mb-1">Idioma principal</label>
+        <select id="fa-idioma"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+          <option value="Portugues">Português</option>
+          <option value="Crioulo Haitiano">Crioulo haitiano</option>
+          <option value="Frances">Francês</option>
+          <option value="Espanhol">Espanhol</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="fa-contato" class="block font-semibold text-slate-700 mb-1">Telefone / WhatsApp</label>
+        <input id="fa-contato" type="text" placeholder="(67) 9..."
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-600">
+      </div>
+
+      <div class="sm:col-span-2">
+        <label for="fa-bairro" class="block font-semibold text-slate-700 mb-1">Bairro em Campo Grande/MS</label>
+        <input id="fa-bairro" type="text" placeholder="Ex.: Vila Cruzeiro, Centro..."
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-600">
+      </div>
+    </div>
+
+    <!-- Detalhes complementares recolhidos do Bloco I -->
+    <div class="pt-1">
+      <button type="button" onclick="alternarBlocoDetalhe('detalhe-bloco-1', 'icone-bloco-1', 'texto-bloco-1')"
+        class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-sky-800 hover:text-sky-950 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-3 py-1.5 rounded-lg transition cursor-pointer">
+        <span id="icone-bloco-1">+</span>
+        <span id="texto-bloco-1">Expandir dados complementares (nascimento, estado civil, moradia e endereço)</span>
+      </button>
+    </div>
+
+    <div id="detalhe-bloco-1" class="hidden border-t border-slate-200 pt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs text-slate-700 bg-slate-50/70 p-3.5 rounded-lg">
+      <div>
+        <label for="fa-nascimento" class="block font-semibold text-slate-700 mb-1">Data de nascimento</label>
+        <input id="fa-nascimento" type="date"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+      </div>
+
+      <div>
+        <label for="fa-estado-civil" class="block font-semibold text-slate-700 mb-1">Estado civil / União estável</label>
+        <select id="fa-estado-civil"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+          <option value="">Não informado</option>
+          <option value="Solteiro(a)">Solteiro(a)</option>
+          <option value="Casado(a)">Casado(a)</option>
+          <option value="Uniao Estavel">União estável</option>
+          <option value="Separado(a)/Divorciado(a)">Separado(a) / Divorciado(a)</option>
+          <option value="Viuvo(a)">Viúvo(a)</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="fa-moradia" class="block font-semibold text-slate-700 mb-1">Situação de moradia</label>
+        <select id="fa-moradia"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+          <option value="">Não informada</option>
+          <option value="Aluguel">Aluguel</option>
+          <option value="Cedida/Parentes">Cedida / Parentes ou amigos</option>
+          <option value="Propria">Própria</option>
+          <option value="Acolhimento/Abrigo">Acolhimento / Abrigo</option>
+          <option value="Situacao de rua">Situação de rua</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="fa-endereco" class="block font-semibold text-slate-700 mb-1">Endereço completo</label>
+        <input id="fa-endereco" type="text" placeholder="Rua, nº, complemento e CEP"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================== -->
+  <!-- BLOCO II: TRIAGEM DE VULNERABILIDADE & PERFIL SOCIOECONÔMICO -->
+  <!-- ======================================== -->
+  <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3 mb-4">
+      <div class="flex items-center space-x-2.5">
+        <span class="w-7 h-7 rounded-lg bg-accent-600 text-white flex items-center justify-center text-xs font-bold">
+          II
+        </span>
+        <div>
+          <h3 class="font-bold text-brand-900 text-sm sm:text-base">
+            Triagem de Vulnerabilidade &amp; Perfil Socioeconômico
+          </h3>
+          <p class="text-[11px] text-slate-500">
+            Renda familiar, situação de trabalho, acesso a benefícios e avaliação de hipossuficiência.
+          </p>
+        </div>
+      </div>
+      <span class="text-[10px] bg-amber-50 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">
+        Avaliação de Hipossuficiência
+      </span>
+    </div>
+
+    <!-- Indicadores rápidos do Bloco II -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs text-slate-700 mb-4">
+      <div>
+        <label for="fa-situacao-trabalho" class="block font-semibold text-slate-700 mb-1">Situação de trabalho</label>
+        <select id="fa-situacao-trabalho"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+          <option value="">Selecione...</option>
+          <option value="Desempregado(a) / Sem renda">Desempregado(a) / Sem renda</option>
+          <option value="Trabalho informal / Bicos">Trabalho informal / Bicos</option>
+          <option value="Empregado(a) formal">Empregado(a) formal</option>
+          <option value="Autonomo(a) / MEI">Autônomo(a) / MEI</option>
+          <option value="Aposentado(a) / Pensionista">Aposentado(a) / Pensionista</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="fa-renda-mensal" class="block font-semibold text-slate-700 mb-1">Renda aproximada (R$)</label>
+        <input id="fa-renda-mensal" type="text" placeholder="Ex.: R$ 0,00 ou R$ 1.200,00"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-600">
+      </div>
+
+      <div>
+        <label for="fa-cadunico" class="block font-semibold text-slate-700 mb-1">CadÚnico / Benefício</label>
+        <select id="fa-cadunico"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+          <option value="">Não informado</option>
+          <option value="CadUnico atualizado">CadÚnico atualizado</option>
+          <option value="CadUnico desatualizado/pendente">CadÚnico desatualizado / pendente</option>
+          <option value="Recebe beneficio (Bolsa Familia / BPC / etc.)">Recebe benefício social/previdenciário</option>
+          <option value="Sem beneficio">Sem benefício ativo</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="fa-vulnerabilidade" class="block font-semibold text-slate-700 mb-1">Alerta de vulnerabilidade</label>
+        <select id="fa-vulnerabilidade"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+          <option value="Padrao">Padrão</option>
+          <option value="Urgencia / Risco imediato">Urgência / Risco imediato</option>
+          <option value="Pessoa idosa ou com deficiencia">Pessoa idosa ou com deficiência</option>
+          <option value="Familia com criancas / gestante">Família com crianças / gestante</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Detalhes complementares recolhidos do Bloco II -->
+    <div class="pt-1">
+      <button type="button" onclick="alternarBlocoDetalhe('detalhe-bloco-2', 'icone-bloco-2', 'texto-bloco-2')"
+        class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-sky-800 hover:text-sky-950 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-3 py-1.5 rounded-lg transition cursor-pointer">
+        <span id="icone-bloco-2">+</span>
+        <span id="texto-bloco-2">Expandir composição familiar e avaliação socioeconômica</span>
+      </button>
+    </div>
+
+    <div id="detalhe-bloco-2" class="hidden border-t border-slate-200 pt-3 grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs text-slate-700 bg-slate-50/70 p-3.5 rounded-lg">
+      <div>
+        <label for="fa-familia" class="block font-semibold text-slate-700 mb-1">Composição do grupo familiar</label>
+        <input id="fa-familia" type="text" placeholder="Ex.: Mora com cônjuge e 2 filhos; quantos trabalham"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+      </div>
+
+      <div>
+        <label for="fa-despesas-saude" class="block font-semibold text-slate-700 mb-1">Despesas essenciais / Saúde</label>
+        <input id="fa-despesas-saude" type="text" placeholder="Ex.: Aluguel, medicamentos, laudo médico, tratamento..."
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================== -->
+  <!-- BLOCO III: CLASSIFICAÇÃO DA DEMANDA & RELATO DO CASO -->
+  <!-- ======================================== -->
+  <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3 mb-4">
+      <div class="flex items-center space-x-2.5">
+        <span class="w-7 h-7 rounded-lg bg-brand-800 text-white flex items-center justify-center text-xs font-bold">
+          III
+        </span>
+        <div>
+          <h3 class="font-bold text-brand-900 text-sm sm:text-base">
+            Classificação da Demanda &amp; Relato Objetivo
+          </h3>
+          <p class="text-[11px] text-slate-500">
+            Área jurídica ou administrativa, síntese do pedido e documentos disponíveis.
+          </p>
+        </div>
+      </div>
+      <span class="text-[10px] bg-slate-100 text-slate-700 font-semibold px-2 py-0.5 rounded border border-slate-200">
+        Triagem Jurídica
+      </span>
+    </div>
+
+    <!-- Essencial do Bloco III -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs text-slate-700 mb-4">
+      <div class="sm:col-span-2">
+        <label for="fa-area" class="block font-semibold text-slate-700 mb-1">Área principal da demanda</label>
+        <select id="fa-area"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+          <option value="">Selecione a área...</option>
+          <option value="previdenciario-bpc">Previdenciário / BPC-LOAS (LAPREVS)</option>
+          <option value="trabalhista">Trabalhista</option>
+          <option value="autodeclaracao">Autodeclaração / Orientação documental</option>
+          <option value="migracao-refugio">Migração / Refúgio / DPU</option>
+          <option value="outros">Outros encaminhamentos</option>
+        </select>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label for="fa-documentos-possui" class="block font-semibold text-slate-700 mb-1">Documentos apresentados no dia</label>
+        <input id="fa-documentos-possui" type="text" placeholder="Ex.: CRNM, carteira de trabalho, comprovante, laudo..."
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-600">
+      </div>
+
+      <div class="sm:col-span-2 lg:col-span-4">
+        <label for="fa-resumo" class="block font-semibold text-slate-700 mb-1">Resumo objetivo do caso</label>
+        <textarea id="fa-resumo" rows="2" placeholder="Descreva de forma clara e direta o que o assistido precisa..."
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-600"></textarea>
+      </div>
+    </div>
+
+    <!-- Detalhes complementares recolhidos do Bloco III -->
+    <div class="pt-1">
+      <button type="button" onclick="alternarBlocoDetalhe('detalhe-bloco-3', 'icone-bloco-3', 'texto-bloco-3')"
+        class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-sky-800 hover:text-sky-950 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-3 py-1.5 rounded-lg transition cursor-pointer">
+        <span id="icone-bloco-3">+</span>
+        <span id="texto-bloco-3">Expandir cronologia, pendências e observações do relato</span>
+      </button>
+    </div>
+
+    <div id="detalhe-bloco-3" class="hidden border-t border-slate-200 pt-3 grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs text-slate-700 bg-slate-50/70 p-3.5 rounded-lg">
+      <div>
+        <label for="fa-pendencias" class="block font-semibold text-slate-700 mb-1">Pendências identificadas</label>
+        <input id="fa-pendencias" type="text" placeholder="Ex.: Falta comprovar vínculo, atualizar CadÚnico..."
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+      </div>
+
+      <div>
+        <label for="fa-obs-complementares" class="block font-semibold text-slate-700 mb-1">Observações adicionais</label>
+        <input id="fa-obs-complementares" type="text" placeholder="Datas importantes, prazos ou detalhes do relato"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================== -->
+  <!-- BLOCO IV: ENCAMINHAMENTO, RETORNO & REGISTRO -->
+  <!-- ======================================== -->
+  <div class="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3 mb-4">
+      <div class="flex items-center space-x-2.5">
+        <span class="w-7 h-7 rounded-lg bg-brand-800 text-white flex items-center justify-center text-xs font-bold">
+          IV
+        </span>
+        <div>
+          <h3 class="font-bold text-brand-900 text-sm sm:text-base">
+            Encaminhamento, Orientação &amp; Próximos Passos
+          </h3>
+          <p class="text-[11px] text-slate-500">
+            Definição do fluxo de atendimento, órgão de destino e acompanhamento.
+          </p>
+        </div>
+      </div>
+      <span class="text-[10px] bg-slate-100 text-slate-700 font-semibold px-2 py-0.5 rounded border border-slate-200">
+        Conclusão do Plantão
+      </span>
+    </div>
+
+    <!-- Essencial do Bloco IV -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs text-slate-700 mb-4">
+      <div class="sm:col-span-2">
+        <label for="fa-encaminhamento" class="block font-semibold text-slate-700 mb-1">Encaminhamento definido</label>
+        <select id="fa-encaminhamento"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600">
+          <option value="">Selecione o encaminhamento...</option>
+          <option value="LAPREVS (Atermação administrativa/judicial - BPC/Previdenciário)">LAPREVS (Atermação administrativa/judicial - BPC/Previdenciário)</option>
+          <option value="Autodeclaracao (Modelo generico sem nome fixo)">Autodeclaração (Modelo genérico)</option>
+          <option value="Encaminhamento Trabalhista">Encaminhamento Trabalhista</option>
+          <option value="DPU / Rede de Apoio ao Migrante">DPU / Rede de Apoio ao Migrante</option>
+          <option value="CRAS / Assistencia Social">CRAS / Assistência Social</option>
+          <option value="Orientacao concluida no plantao">Orientação concluída no plantão</option>
+        </select>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label for="fa-proximos-passos" class="block font-semibold text-slate-700 mb-1">Próximos passos / Retorno</label>
+        <input id="fa-proximos-passos" type="text" placeholder="Ex.: Comparecer ao plantão da LAPREVS com documentos..."
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-600">
+      </div>
+    </div>
+
+    <!-- Detalhes complementares recolhidos do Bloco IV -->
+    <div class="pt-1">
+      <button type="button" onclick="alternarBlocoDetalhe('detalhe-bloco-4', 'icone-bloco-4', 'texto-bloco-4')"
+        class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-sky-800 hover:text-sky-950 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-3 py-1.5 rounded-lg transition cursor-pointer">
+        <span id="icone-bloco-4">+</span>
+        <span id="texto-bloco-4">Expandir notas internas do extensionista</span>
+      </button>
+    </div>
+
+    <div id="detalhe-bloco-4" class="hidden border-t border-slate-200 pt-3 text-xs text-slate-700 bg-slate-50/70 p-3.5 rounded-lg">
+      <label for="fa-notas-extensionista" class="block font-semibold text-slate-700 mb-1">Notas internas da equipe</label>
+      <textarea id="fa-notas-extensionista" rows="2" placeholder="Registro interno para acompanhamento do caso ou retorno..."
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-600"></textarea>
+    </div>
+  </div>
+
+</div>
       </section>
 
       <!-- SECTION: BANCO DE ATENDIMENTOS & GESTÃO DA EXTENSÃO -->
@@ -7815,6 +7614,34 @@ LADIR • Faculdade de Direito • FADIR / UFMS`;
       window.setActiveSection('sec-simulador');
     }
   };
+
+function gerarRoteiroEncaminhamentoAssistido() {
+      // ... código existente ...
+    }
+
+    function alternarBlocoDetalhe(idBloco, idIcone, idTexto) {
+      const bloco = document.getElementById(idBloco);
+      const icone = document.getElementById(idIcone);
+      const texto = document.getElementById(idTexto);
+      if (!bloco) return;
+
+      const vaiAbrir = bloco.classList.contains('hidden');
+      bloco.classList.toggle('hidden', !vaiAbrir);
+
+      if (icone) {
+        icone.textContent = vaiAbrir ? '−' : '+';
+      }
+
+      if (texto) {
+        if (vaiAbrir) {
+          texto.dataset.labelFechado = texto.textContent;
+          texto.textContent = 'Ocultar campos complementares';
+        } else if (texto.dataset.labelFechado) {
+          texto.textContent = texto.dataset.labelFechado;
+        }
+      }
+    };
+  
 </script>
 </body>
 </html>
